@@ -1,10 +1,9 @@
 'use client';
 
+import { useRealities } from '@/hooks/useRealities';
 import type { Reality } from '@/types/reality.types';
-import { fetchRealities } from '@/utils/reality.utils';
 import { Card, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useEffect, useState } from 'react';
 import styles from './page.module.scss';
 
 const columns: ColumnsType<Reality> = [
@@ -24,24 +23,7 @@ const columns: ColumnsType<Reality> = [
 ];
 
 const RealitiesPage = () => {
-	const [realities, setRealities] = useState<Reality[]>([]);
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		const loadRealities = async () => {
-			try {
-				setLoading(true);
-				const data = await fetchRealities();
-				setRealities(data);
-			} catch (_error) {
-				// @NOTE: Error loading realities, showing empty table
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		loadRealities();
-	}, []);
+	const { realities, loading, error } = useRealities();
 
 	return (
 		<div className="container">
@@ -52,6 +34,7 @@ const RealitiesPage = () => {
 				<div className={styles.tableHeader}>
 					<h2>Realities Data</h2>
 					<p>Complete list of all available realities</p>
+					{error && <p style={{ color: 'red', marginTop: '8px' }}>⚠️ {error}</p>}
 				</div>
 				<Table
 					columns={columns}
