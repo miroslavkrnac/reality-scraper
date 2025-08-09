@@ -14,7 +14,7 @@ interface RootLayoutProps {
 
 const RootLayout = ({ children }: RootLayoutProps) => (
 	<html lang="en">
-		<body>
+		<body className='sidebar-collapsed'>
 			<StyleRegistry>
 				<ClientProviders>
 					<main>{children}</main>
