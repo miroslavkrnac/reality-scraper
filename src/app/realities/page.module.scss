@@ -37,5 +37,27 @@
 			margin: 24px 0 8px;
 			text-align: center;
 		}
+
+		// @NOTE: Fix empty state centering and glitch
+		:global(.ant-table-placeholder .ant-table-cell) {
+			text-align: center;
+			padding: 60px 20px;
+			border: none;
+			background: transparent;
+		}
+
+		:global(.ant-table-placeholder) {
+			background: transparent;
+		}
+
+		// @NOTE: Ensure table body has proper styling
+		:global(.ant-table-tbody) {
+			position: relative;
+		}
+
+		// @NOTE: Prevent layout shifts during loading
+		:global(.ant-table-empty .ant-table-tbody) {
+			min-height: 120px;
+		}
 	}
 }

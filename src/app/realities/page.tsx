@@ -2,7 +2,7 @@
 
 import { useRealities } from '@/hooks/useRealities';
 import type { Reality } from '@/types/reality.types';
-import { Card, Table } from 'antd';
+import { Card, Empty, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './page.module.scss';
 
@@ -46,6 +46,17 @@ const RealitiesPage = () => {
 						showSizeChanger: true,
 						showQuickJumper: true,
 						showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+					}}
+					locale={{
+						emptyText: (
+							<div style={{ padding: '40px 20px', textAlign: 'center' }}>
+								<Empty
+									image={Empty.PRESENTED_IMAGE_SIMPLE}
+									description="No realities found"
+									style={{ margin: 0 }}
+								/>
+							</div>
+						),
 					}}
 					className={styles.table}
 				/>
