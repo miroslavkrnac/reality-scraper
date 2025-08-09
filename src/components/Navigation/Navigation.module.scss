@@ -18,8 +18,19 @@
 		}
 
 		:global(.ant-menu-item-selected) {
+			color: #1890ff !important;
+			border-bottom-color: #1890ff !important;
+			border-bottom-width: 2px !important;
+			font-weight: 600 !important;
+
+			&::after {
+				border-bottom-color: #1890ff !important;
+			}
+		}
+
+		// @NOTE: Ensure active state is visible
+		:global(.ant-menu-item-active) {
 			color: #1890ff;
-			border-bottom-color: #1890ff;
 		}
 	}
 }
