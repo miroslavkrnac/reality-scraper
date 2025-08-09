@@ -1,5 +1,5 @@
 const config = {
-	entry: ['src/app/layout.tsx', 'src/app/page.tsx', 'src/app/**/page.tsx', 'src/app/**/route.ts'],
+	entry: ['src/app/**/page.tsx', 'src/app/**/route.ts'],
 	project: ['src/**/*.{ts,tsx}'],
 	ignore: [
 		'**/*.test.{ts,tsx}',
@@ -10,7 +10,7 @@ const config = {
 		'postcss.config.js',
 		'prisma/**/*',
 	],
-	ignoreDependencies: ['@types/*'],
+	ignoreBinaries: ['docker-compose'],
 	ignoreExportsUsedInFile: true,
 	rules: {
 		enumMembers: 'off',

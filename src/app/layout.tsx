@@ -16,7 +16,9 @@ const RootLayout = ({ children }: RootLayoutProps) => (
 	<html lang="en">
 		<body>
 			<StyleRegistry>
-				<ClientProviders>{children}</ClientProviders>
+				<ClientProviders>
+					<main>{children}</main>
+				</ClientProviders>
 			</StyleRegistry>
 		</body>
 	</html>

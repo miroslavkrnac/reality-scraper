@@ -1,36 +1,109 @@
 .navigation {
 	background: white;
-	border-bottom: 1px solid #f0f0f0;
-	margin-bottom: 20px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+	border-right: 1px solid #f0f0f0;
+	box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+	height: 100vh;
+	width: 250px;
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	transition: width 0.2s ease;
+
+	&.collapsed {
+		width: 80px;
+
+		.logoSection {
+			.collapseButton {
+				margin: 0 auto;
+			}
+		}
+	}
+
+	.logoSection {
+		padding: 16px;
+		border-bottom: 1px solid #f0f0f0;
+		background: #fafafa;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 64px;
+
+		.logo {
+			margin: 0;
+			font-size: 1.1rem;
+			font-weight: 600;
+			color: #1890ff;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+
+		.collapseButton {
+			flex-shrink: 0;
+			width: 32px;
+			height: 32px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 4px;
+
+			&:hover {
+				background-color: #f0f0f0;
+			}
+		}
+	}
 
 	.menu {
-		border-bottom: none;
-		line-height: 64px;
+		border-right: none;
+		flex: 1;
+		padding: 8px 0;
+		overflow: hidden;
 
 		:global(.ant-menu-item) {
 			font-weight: 500;
-			margin: 0 24px 0 0;
+			margin: 2px 8px;
+			border-radius: 6px;
+			height: 40px;
+			line-height: 40px;
+			display: flex;
+			align-items: center;
 
 			&:hover {
 				color: #1890ff;
+				background-color: #f0f9ff;
 			}
 		}
 
 		:global(.ant-menu-item-selected) {
 			color: #1890ff !important;
-			border-bottom-color: #1890ff !important;
-			border-bottom-width: 2px !important;
+			background-color: #e6f4ff !important;
 			font-weight: 600 !important;
 
 			&::after {
-				border-bottom-color: #1890ff !important;
+				display: none;
 			}
 		}
 
 		// @NOTE: Ensure active state is visible
 		:global(.ant-menu-item-active) {
 			color: #1890ff;
+		}
+
+		// @NOTE: Remove default menu styles
+		:global(.ant-menu-inline) {
+			border-right: none;
+		}
+
+		// @NOTE: Icon styling for collapsed state
+		:global(.ant-menu-item-icon) {
+			font-size: 16px;
+		}
+
+		// @NOTE: Tooltip positioning for collapsed menu
+		:global(.ant-tooltip) {
+			z-index: 1001;
 		}
 	}
 }
