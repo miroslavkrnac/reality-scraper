@@ -1,0 +1,360 @@
+---
+description: Comprehensive Unit Testing Standards for all *.test.tsx and *.test.ts files
+alwaysApply: false
+---
+
+## Test Framework & Setup
+- Always use `yarn workspace @iwd/[package-name] test --run` command from mono-repository root to test files
+- Use **Vitest** as the testing framework
+- Use react-testing-library for testing React components
+- Import test utilities: `import { beforeEach, describe, expect, it, vi } from 'vitest'`
+- Follow the existing test setup from `vitest.config.ts`, `vitest.setup.ts`, `react-testing-library.setup.ts`
+- Use `vi.hoisted()` for complex mock setups at module level
+- Use `reflect-metadata` for dependency injection testing
+- Always use data-test-id for querying DOM elements
+- Keep test props concise and remove redundant explicit boolean values where the test intent is clear `render(<Component {...defaultProps} booleanProp anotherBooleanProp />);`
+- Ensure test descriptions accurately reflect what is being tested
+- Use consistent testing framework syntax throughout documentation
+- Ensure mock components maintain type compatibility with real components for better test reliability
+- All tests should follow biome.jsonc standards
+- Follow KISS and DRY principles
+- For reused and copied code always create utility functions
+- Do not create any code comments unless you are asked to
+
+## Test File Structure & Organization
+
+### Basic Structure
+```typescript
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ComponentOrService } from './ComponentOrService';
+
+describe('ComponentOrService', () => {
+  let component: ComponentOrService;
+
+  beforeEach(() => {
+    component = new ComponentOrService();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should perform expected behavior', () => {
+    // test implementation
+  });
+});
+```
+
+## Advanced Mocking Techniques
+
+### Module-Level Mocking
+```typescript
+vi.mock('./service', () => ({
+  Service: mocks.MockService,
+}));
+```
+
+### Partial Module Mocking
+```typescript
+// Mock specific functions while keeping others
+vi.spyOn(module, 'functionName').mockImplementation(() => 'mocked');
+vi.spyOn(module, 'functionName').mockReturnValueOnce('mocked');
+```
+
+### React Component Mocking
+```typescript
+// Mock React components
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => vi.fn(),
+  Link: ({ children, ...props }) => <a {...props}>{children}</a>,
+}));
+
+// Mock custom hooks
+vi.spyOn(hookModule, 'useCustomHook').mockReturnValue({
+  data: mockData,
+  loading: false,
+});
+```
+
+## Service Testing Patterns
+
+### Database Service Testing
+```typescript
+// Mock Prisma client
+const mockPrisma = {
+  user: {
+    findMany: vi.fn().mockResolvedValue([userMock]),
+    findUnique: vi.fn().mockResolvedValue(userMock),
+    create: vi.fn().mockResolvedValue(newUserMock),
+    update: vi.fn().mockResolvedValue(updatedUserMock),
+    delete: vi.fn().mockResolvedValue(deletedUserMock),
+  },
+};
+
+vi.mock('@prisma/client', () => ({
+  PrismaClient: vi.fn().mockImplementation(() => mockPrisma),
+}));
+```
+
+### API Service Testing
+```typescript
+// Mock fetch API
+global.fetch = vi.fn().mockResolvedValue({
+  ok: true,
+  json: () => Promise.resolve(mockResponse),
+});
+
+// Mock axios
+const mockAxios = vi.mocked('axios');
+mockAxios.get.mockResolvedValue({ data: mockResponse });
+```
+
+### GraphQL Service Testing
+```typescript
+// Mock GraphQL operations
+const mockGraphQLResponse = {
+  data: { users: [userMock] },
+  loading: false,
+  error: null,
+};
+
+vi.spyOn(graphqlModule, 'useQuery').mockReturnValue(mockGraphQLResponse);
+```
+
+## Component Testing Patterns
+
+### React Component Testing
+```typescript
+// Test component rendering
+const { getByTestId, queryByText } = render(<Component />);
+expect(queryByTestId('component')).not.toBeNull();
+
+// Test user interactions
+fireEvent.click(getByTestId('button'));
+fireEvent.change(getByTestId('input'), { target: { value: 'test' } });
+
+// Test async behavior
+await waitFor(() => {
+  expect(screen.queryByText('loaded')).not.toBeNull()
+});
+```
+
+### Hook Testing
+```typescript
+// Test custom hooks
+const { result } = renderHook(() => useCustomHook(initialProps));
+
+expect(result.current.value).toBe(expectedValue);
+
+// Test hook updates
+act(() => {
+  result.current.updateValue(newValue);
+});
+
+expect(result.current.value).toBe(newValue);
+```
+
+### Context Testing
+```typescript
+// Test context providers
+const TestWrapper = ({ children }) => (
+  <TestContext.Provider value={mockContextValue}>
+    {children}
+  </TestContext.Provider>
+);
+
+render(<Component />, { wrapper: TestWrapper });
+```
+
+## Utility Testing Patterns
+
+### Pure Function Testing
+```typescript
+// Test pure functions with various inputs
+describe('utility function', () => {
+  it('should handle valid input', () => {
+    expect(utilityFunction('valid')).toBe('expected');
+  });
+
+  it('should handle edge cases', () => {
+    expect(utilityFunction('')).toBe('');
+    expect(utilityFunction(null)).toBeNull();
+  });
+
+  it('should throw on invalid input', () => {
+    expect(() => utilityFunction(undefined)).toThrow();
+  });
+});
+```
+
+### Date/Time Testing
+```typescript
+// Mock dates for consistent testing
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2023-01-01'));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+```
+
+### Error Handling Testing
+```typescript
+// Test error scenarios
+it('should handle errors gracefully', async () => {
+  const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+  await expect(asyncFunction()).rejects.toThrow('Expected error');
+
+  expect(consoleSpy).toHaveBeenCalled();
+  consoleSpy.mockRestore();
+});
+```
+
+## Integration Testing Patterns
+
+### Component Integration
+```typescript
+// Test component interactions
+it('should update parent when child changes', async () => {
+  const onUpdateMock = vi.fn();
+
+  render(<ParentComponent onUpdate={onUpdateMock} />);
+
+  fireEvent.click(screen.getByTestId('child-button'));
+
+  await waitFor(() => {
+    expect(onUpdateMock).toHaveBeenCalledWith(expectedValue);
+  });
+});
+```
+
+### Service Integration
+```typescript
+// Test service interactions
+it('should call multiple services correctly', async () => {
+  const service1Mock = vi.spyOn(service1, 'method').mockResolvedValue(result1);
+  const service2Mock = vi.spyOn(service2, 'method').mockResolvedValue(result2);
+
+  await integratedFunction();
+
+  expect(service1Mock).toHaveBeenCalledWith(expectedParams1);
+  expect(service2Mock).toHaveBeenCalledWith(expectedParams2);
+});
+```
+
+## Test Data Management
+
+### Mock Data Organization
+```typescript
+// Centralize mock data
+export const mockData = {
+  users: [userMock1, userMock2],
+  posts: [postMock1, postMock2],
+  comments: [commentMock1, commentMock2],
+};
+
+// Use factory functions for dynamic data
+export const createMockUser = (overrides = {}) => ({
+  id: 1,
+  name: 'Test User',
+  email: 'test@example.com',
+  ...overrides,
+});
+```
+
+### Test Data Cleanup
+```typescript
+// Clean up test data
+beforeEach(() => {
+  // Reset mock data
+  vi.clearAllMocks();
+  // Clear any stored state
+  localStorage.clear();
+  sessionStorage.clear();
+});
+
+afterEach(() => {
+  // Clean up any side effects
+  vi.restoreAllMocks();
+});
+```
+
+### Private Method Testing
+```typescript
+// Test private methods using literal keys with biome-ignore comment
+it('should test private method behavior', () => {
+  const instance = new TestClass();
+
+  // biome-ignore lint/complexity/useLiteralKeys: intended
+  const result = instance['privateMethod']('test');
+
+  expect(result).toBe('expected');
+});
+
+// Test private properties
+it('should verify private property state', () => {
+  const instance = new TestClass();
+
+  // biome-ignore lint/complexity/useLiteralKeys: intended
+  expect(instance['privateProperty']).toHaveLength(1);
+
+  // biome-ignore lint/complexity/useLiteralKeys: intended
+  expect(instance['privateProperty'][0]).toEqual(expect.objectContaining(expectedData));
+});
+
+// Test private methods with complex logic
+it('should test private calculation method', () => {
+  const manager = new CalculationManager();
+
+  // biome-ignore lint/complexity/useLiteralKeys: intended
+  const { messageData, additionalData } = manager['prepareMeasureCalculationData']({
+    object: testObject,
+    operationId: 'test-id',
+  });
+
+  expect(messageData.name).toEqual('CALCULATION');
+  expect(messageData.entityType).toEqual('test');
+});
+```
+
+## Best Practices
+
+### Test Naming
+- Use descriptive test names that explain the scenario
+- Follow pattern: "should [expected behavior] when [condition]"
+- Group related tests with `describe` blocks
+
+### Test Organization
+- Arrange: Set up test data and mocks
+- Act: Perform the action being tested
+- Assert: Verify the expected outcome
+
+### Test Isolation
+- Each test should be independent
+- Use `beforeEach` and `afterEach` for setup/cleanup
+- Avoid shared state between tests
+
+### Mock Management
+- Mock at the lowest level possible
+- Use `vi.spyOn` for method mocking
+- Use `vi.mock` for module mocking
+- Always restore mocks in `afterEach`
+
+### Async Testing
+- Use `async/await` for async operations
+- Use `waitFor` for async assertions
+- Handle promises properly with `act()`
+
+### Error Testing
+- Test both success and error scenarios
+- Verify error messages and types
+- Test edge cases and boundary conditions
+
+### Coverage
+- Aim for high test coverage (80%+)
+- Focus on critical business logic
+- Test error handling paths
+- Include integration tests for complex workflows

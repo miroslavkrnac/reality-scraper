@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+
+## General mono-repository rules
+- Always use `yarn workspace @iwd/[package-name] test --run` command from mono-repository root to test files
+- Never use `cd` command to jump to packages if you call `yarn workspace` commands
+- Always run tests using yarn workspace @iwd/[package-name] test --run from repository root and fix errors
+- Always lint whole mono-repository using `yarn biome check` and fix lint errors using `yarn biome check --fix`

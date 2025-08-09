@@ -1,0 +1,41 @@
+.tableCard {
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+
+	.tableHeader {
+		padding: 24px 24px 16px;
+		border-bottom: 1px solid #f0f0f0;
+
+		h2 {
+			font-size: 1.8rem;
+			font-weight: 600;
+			color: #1890ff;
+			margin: 0 0 8px;
+		}
+
+		p {
+			color: #666;
+			margin: 0;
+			font-size: 1rem;
+		}
+	}
+
+	.table {
+		:global(.ant-table-thead > tr > th) {
+			background-color: #fafafa;
+			font-weight: 600;
+			color: #1890ff;
+		}
+
+		:global(.ant-table-tbody > tr:hover > td) {
+			background-color: #f0f9ff;
+		}
+
+		:global(.ant-pagination) {
+			margin: 24px 0 8px;
+			text-align: center;
+		}
+	}
+}

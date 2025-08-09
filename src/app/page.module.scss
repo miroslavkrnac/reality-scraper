@@ -1,0 +1,23 @@
+.homepageCard {
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+	.content {
+		padding: 40px 20px;
+
+		h2 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			color: #1890ff;
+			margin-bottom: 16px;
+		}
+
+		p {
+			font-size: 1.1rem;
+			color: #666;
+			line-height: 1.6;
+		}
+	}
+}

@@ -1,0 +1,538 @@
+---
+alwaysApply: true
+---
+
+# TypeScript Code Style Standards
+
+## Overview
+This document defines comprehensive TypeScript coding standards based on the established patterns in the mono-repository. These standards ensure consistency, maintainability, and modern TypeScript best practices across all packages. **Remember: NEVER use `any` - it defeats the purpose of TypeScript!**
+
+- Use Yarn as a package manager
+- Use Biome as a linter
+- Never change biome.jsonc file unless you were asked to
+- Always begin single line comment with `@NOTE: `
+- Prioritize code readability
+- Prioritize variable declaration with `const` over `let`
+- Split code to logic utility functions
+- All feature specific hard-coded (magic) constants should be in [feature_name].consts.ts
+- All feature specific utility functions should be in [feature_name].utils.ts
+- All feature specific type definitions should be in [feature_name].types.ts
+
+### Project commands
+- To lint project use `yarn biome check`
+- To fix lint errors use `yarn biome check --fix`
+
+## Code Formatting & Structure
+
+### File Organization
+- Use **tabs** for indentation (4 spaces width)
+- Maximum line length: **120 characters**
+- Use **single quotes** for strings
+- Use **trailing commas** in all multi-line structures
+- Use **semicolons** at the end of statements
+- Use **LF** line endings
+- Use **bracket spacing** in object literals
+- Use **arrow parentheses** only when needed (`asNeeded`)
+
+### Import/Export Patterns
+```typescript
+// ✅ Preferred: Named imports with type imports
+import type { ComponentProps, FC } from 'react';
+import { useState, useEffect } from 'react';
+import { Button, Card } from '@iwd/ui-kit';
+
+// ✅ Preferred: Named exports
+export const MyComponent: FC<ComponentProps> = () => {
+  // component implementation
+};
+
+// ✅ Preferred: Type exports
+export type { ComponentProps, ComponentState };
+
+// ❌ Avoid: Default exports (except for entry points)
+// biome-ignore lint/style/noDefaultExport: Intended default export
+export default MyComponent;
+```
+
+### Type Declarations
+```typescript
+// ✅ Preferred: Interface for object shapes
+interface UserConfig {
+  id: ID;
+  name: string;
+  email?: string;
+}
+
+// ✅ Preferred: Type for unions, intersections, mapped types
+type UserStatus = 'active' | 'inactive' | 'pending';
+type UserWithMetadata = UserConfig & { metadata: Record<string, unknown> };
+
+// ✅ Preferred: Use utility types from advanced-types.d.ts
+type WithRequired<T extends {}, K extends keyof T> = DistributiveExtend<
+  DistributiveOmit<T, K>,
+  {
+    [MK in K]-?: NonNullable<T[MK]>;
+  }
+>;
+```
+
+### Interface vs Type Guidelines
+```typescript
+// ✅ ALWAYS prefer interfaces for object shapes
+interface User {
+  id: ID;
+  name: string;
+  email: string;
+}
+
+// ✅ Use types only for unions, intersections, and complex type operations
+type Status = 'loading' | 'success' | 'error';
+type UserWithPermissions = User & { permissions: string[] };
+type ApiResult<T> = { success: true; data: T } | { success: false; error: string };
+
+// ❌ Avoid: Using types for simple object shapes
+// type User = {
+//   id: ID;
+//   name: string;
+//   email: string;
+// };
+
+// ✅ Good: Use interfaces for object shapes
+interface User {
+  id: ID;
+  name: string;
+  email: string;
+}
+```
+
+## Function Patterns
+
+### Arrow Functions
+```typescript
+// ✅ Preferred: Arrow functions for expressions
+const add = (a: number, b: number): number => a + b;
+
+// ✅ Preferred: Arrow functions for complex logic
+const processData = async (data: Data[]): Promise<ProcessedData[]> => {
+  const results = await Promise.all(
+    data.map(async item => {
+      const processed = await processItem(item);
+      return { ...processed, timestamp: Date.now() };
+    })
+  );
+
+  return results.filter(Boolean);
+};
+
+// ✅ Preferred: Function expressions for complex functions
+export const complexCalculation = <T extends number>(
+  input: T[],
+  options: CalculationOptions
+): CalculationResult<T> => {
+  // complex implementation
+}
+```
+
+### Async/Await Patterns
+```typescript
+// ✅ Preferred: Async/await over Promise chains
+const fetchUserData = async (userId: ID): Promise<UserData> => {
+  try {
+    const response = await api.get(`/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(`Failed to fetch user: ${error.message}`);
+  }
+};
+
+// ✅ Preferred: Promise.all for parallel operations
+const fetchMultipleUsers = async (userIds: ID[]): Promise<UserData[]> => {
+  const promises = userIds.map(id => fetchUserData(id));
+  return Promise.all(promises);
+};
+```
+
+## Class Patterns
+
+### Class Structure
+```typescript
+// ✅ Preferred: Class with proper access modifiers
+export class DataManager {
+  private readonly cache = new Map<string, unknown>();
+
+  constructor(private readonly config: Config) {}
+
+  public async getData(key: string): Promise<unknown> {
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+
+    const data = await this.fetchData(key);
+    this.cache.set(key, data);
+    return data;
+  }
+
+  private async fetchData(key: string): Promise<unknown> {
+    // implementation
+  }
+}
+```
+
+## Type Safety Patterns
+
+### Strict Typing - NO `any` Usage
+```typescript
+// ❌ NEVER use 'any' - it defeats TypeScript's purpose
+// const processData = (data: any): any => { ... };
+
+// ✅ Preferred: Explicit types for function parameters and returns
+const validateUser = (user: UserInput): ValidationResult => {
+  const errors: string[] = [];
+
+  if (!user.email?.includes('@')) {
+    errors.push('Invalid email format');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+// ✅ Preferred: Generic constraints
+const createRepository = <T extends { id: ID }>(
+  entityType: string
+): Repository<T> => new Repository<T>(entityType)
+
+// ✅ Preferred: Use utility types from advanced-types.d.ts
+const processData = <T extends UnknownObject>(
+  data: T[]
+): DeepPartial<T>[] => {
+  return data.map(item => ({ ...item, processed: true }));
+};
+```
+
+### Type Guards
+```typescript
+// ✅ Preferred: Type guards for runtime type checking
+const isUser = (entity: unknown): entity is User => (
+    typeof entity === 'object' &&
+    entity !== null &&
+    'id' in entity &&
+    'email' in entity
+);
+
+
+// ✅ Preferred: Discriminated unions
+type ApiResponse<T> =
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: string };
+
+const handleResponse = <T>(response: ApiResponse<T>): T => {
+  if (response.status === 'success') {
+    return response.data;
+  }
+  throw new Error(response.error);
+};
+```
+
+## Error Handling
+
+### Error Patterns
+```typescript
+// ✅ Preferred: Custom error classes
+export class ValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly field: string,
+    public readonly value: unknown
+  ) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+// ✅ Preferred: Result types for error handling
+type Result<T, E = Error> =
+  | { success: true; data: T }
+  | { success: false; error: E };
+
+const safeOperation = async <T>(operation: () => Promise<T>): Promise<Result<T>> => {
+  try {
+    const data = await operation();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error as Error };
+  }
+};
+```
+
+## Utility Patterns
+
+### Pure Functions
+```typescript
+// ✅ Preferred: Pure functions with explicit types
+const transformData = <T, R>(
+  data: T[],
+  transformer: (item: T) => R
+): R[] => data.map(transformer)
+
+// ✅ Preferred: Immutable operations using utility types
+const updateUser = (user: User, updates: Partial<User>): User => ({ ...user, ...updates });
+
+// ✅ Preferred: Use utility types from advanced-types.d.ts
+const filterValidUsers = (users: User[]): NonEmptyArray<User> => {
+  const validUsers = users.filter(user => user.email && user.name);
+  if (validUsers.length === 0) {
+    throw new Error('No valid users found');
+  }
+  return validUsers as NonEmptyArray<User>;
+};
+```
+
+### Configuration Objects
+```typescript
+// ✅ Preferred: Configuration interfaces
+interface Config {
+  readonly apiUrl: string;
+  readonly timeout: number;
+  readonly retries: number;
+}
+
+// ✅ Preferred: Default configurations
+const defaultConfig: Config = {
+  apiUrl: 'https://api.example.com',
+  timeout: 5000,
+  retries: 3,
+} as const;
+
+const createConfig = (overrides: Partial<Config> = {}): Config =>
+    ({ ...defaultConfig, ...overrides });
+```
+
+## Module Patterns
+
+### Barrel Exports
+```typescript
+// ✅ Preferred: Barrel exports for clean imports
+// index.ts
+export * from './components';
+export * from './hooks';
+export * from './types';
+export * from './utils';
+
+// ✅ Preferred: Named exports over default exports
+export { Button } from './Button';
+export { Card } from './Card';
+export type { ButtonProps, CardProps } from './types';
+```
+
+## Advanced Type Patterns
+
+### Conditional Types
+```typescript
+// ✅ Preferred: Conditional types for complex type logic
+type NonNullable<T> = T extends null | undefined ? never : T;
+
+type DeepPartial<T> = T extends Primitive
+  ? T
+  : T extends Array<infer U>
+    ? Array<DeepPartial<U>>
+    : T extends object
+      ? { [P in keyof T]?: DeepPartial<T[P]> }
+      : T;
+```
+
+### Mapped Types
+```typescript
+// ✅ Preferred: Mapped types for transforming object types
+type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+type WithRequired<T, K extends keyof T> = T & {
+  [P in K]-?: NonNullable<T[P]>;
+};
+```
+
+## Performance Patterns
+
+### Lazy Loading
+```typescript
+// ✅ Preferred: Lazy loading for heavy modules
+const heavyModule = await import('./heavyModule');
+
+// ✅ Preferred: Dynamic imports with error handling
+const loadFeature = async (featureName: string) => {
+  try {
+    const module = await import(`./features/${featureName}`);
+    return module.default;
+  } catch (error) {
+    console.error(`Failed to load feature: ${featureName}`, error);
+    return null;
+  }
+};
+```
+
+## Code Comments & Documentation
+### Inline Comments
+```typescript
+// @NOTE: Preferred: Explain complex logic, not obvious code
+const complexAlgorithm = (data: number[]): number => {
+  // @NOTE: Use binary search for O(log n) performance
+  const sortedData = data.sort((a, b) => a - b);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intended
+  useEffect(() => {
+    // @NOTE: This effect should only run when data changes, not on every render
+    processData();
+  }, [data]);
+};
+```
+
+#### @NOTE: prefix
+- Always use `@NOTE: ` prefix, if inline comment is used
+```typescript
+const customConst = 10 // @NOTE: This is number 10
+
+// @NOTE: This function is complex and uses correct commenting convention
+const complexFunction = () => complexWrapper(complexProcess())
+```
+
+
+## Testing Considerations
+
+### Type-Safe Testing
+```typescript
+// ✅ Preferred: Type-safe test utilities
+const createMockUser = (overrides: Partial<User> = {}): User => ({
+  id: '1',
+  name: 'Test User',
+  email: 'test@example.com',
+  ...overrides,
+});
+
+// ✅ Preferred: Type assertions in tests
+const result = await service.getUser('1');
+expect(result).toEqual(expect.objectContaining({
+  id: '1',
+  name: expect.any(String),
+}));
+```
+
+## Common Anti-Patterns to Avoid
+
+### ❌ NEVER use `any` types
+```typescript
+// ❌ ABSOLUTELY FORBIDDEN
+const processData = (data: any): any => {
+  return data.map((item: any) => item.value);
+};
+
+// ✅ Good - Use proper types
+const processData = <T extends { value: unknown }>(
+  data: T[]
+): T['value'][] => {
+  return data.map(item => item.value);
+};
+
+// ✅ Better - Use utility types from advanced-types.d.ts
+const processData = <T extends UnknownObject>(
+  data: T[]
+): ValuesOf<T>[] => {
+  return Object.values(data);
+};
+```
+
+### ❌ Avoid: Type assertions without validation
+```typescript
+// ❌ Bad
+const user = response.data as User;
+
+// ✅ Good
+const user = isUser(response.data) ? response.data : throw new Error('Invalid user data');
+```
+
+### ❌ Avoid: Non-null assertions
+```typescript
+// ❌ Bad
+const element = document.getElementById('my-element')!;
+
+// ✅ Good
+const element = document.getElementById('my-element');
+if (!element) {
+  throw new Error('Element not found');
+}
+```
+
+## Biome Configuration Integration
+
+### Biome Rules Compliance
+- **ALL code must follow biome.jsonc rules**
+- Use `biome-ignore` comments sparingly and only when necessary
+- Follow Biome's recommended patterns for formatting
+- Use Biome's built-in TypeScript rules for consistency
+- Configure Biome to match the project's style preferences
+
+### Common Biome Ignores
+```typescript
+// biome-ignore lint/correctness/useExhaustiveDependencies: [describe specific reason why exhaustive dependencies are not needed]
+useEffect(() => {
+  // Effect intentionally not exhaustive
+}, [specificDependency]);
+
+// biome-ignore lint/style/noDefaultExport: Intended default export because of...
+// biome-ignore lint/style/noDefaultExport: [specify why default export is required, e.g., framework requirements, compatibility needs]
+```
+
+## Utility Types from advanced-types.d.ts
+
+### Preferred Utility Types
+```typescript
+// ✅ Use these utility types from advanced-types.d.ts
+type UserWithOptionalEmail = WithOptional<User, 'email'>;
+type UserWithRequiredId = WithRequired<User, 'id'>;
+type UserWithId = WithID<User>;
+type DeepPartialUser = DeepPartial<User>;
+type DeepRequiredUser = DeepRequired<User>;
+type UserValues = ValuesOf<User>;
+type MaybeUser = Maybe<User>;
+type UserDictionary = Dictionary<User>;
+type UserArray = NonEmptyArray<User>;
+type UserKeys = StringKeys<User>;
+type UserWithoutId = DistributiveOmit<User, 'id'>;
+type UserExtended = Extend<User, { metadata: string }>;
+```
+
+## Package-Specific Patterns
+
+### UI Package Patterns
+- Use functional components with hooks
+- Implement proper prop interfaces
+- Use composition over inheritance
+- Follow accessibility guidelines
+
+### Service Package Patterns
+- Use dependency injection
+- Implement proper error handling
+- Use async/await patterns
+- Follow RESTful API conventions
+
+### Library Package Patterns
+- Use barrel exports for clean imports
+- Implement proper type exports
+- Use utility types from advanced-types.d.ts
+- Follow functional programming principles
+
+## Migration Guidelines
+
+### Legacy Code Migration
+- Gradually migrate from `any` to proper types
+- Replace function declarations with arrow functions where appropriate
+- Update import/export patterns to use named exports
+- Implement proper error handling patterns
+
+### Type Safety Improvements
+- Add strict type checking gradually
+- Implement proper type guards
+- Use discriminated unions for complex state
+- Add proper generic constraints
+- Replace `any` usage with utility types from advanced-types.d.ts

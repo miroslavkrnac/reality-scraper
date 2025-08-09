@@ -1,0 +1,42 @@
+{
+	"name": "reality-scraper",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "biome check",
+		"lint:fix": "biome check --fix",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"db:push": "prisma db push",
+		"db:generate": "prisma generate",
+		"db:migrate": "prisma migrate dev",
+		"db:studio": "prisma studio"
+	},
+	"dependencies": {
+		"@prisma/client": "^5.8.1",
+		"antd": "^5.13.2",
+		"next": "14.0.4",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.5.3",
+		"@testing-library/react": "^14.1.2",
+		"@types/node": "^20.11.5",
+		"@types/react": "^18.2.48",
+		"@types/react-dom": "^18.2.18",
+		"@vitejs/plugin-react": "^4.2.1",
+		"jsdom": "^23.2.0",
+		"knip": "^5.0.1",
+		"prisma": "^5.8.1",
+		"sass": "^1.69.7",
+		"typescript": "^5.3.3",
+		"vitest": "^1.2.0"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	}
+}

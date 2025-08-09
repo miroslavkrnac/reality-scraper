@@ -1,0 +1,402 @@
+---
+description: Comprehensive React Standards for all React components specified in *.tsx files
+---
+
+# React Code Style Standards
+
+## Overview
+This document defines comprehensive React coding standards based on the established patterns in the monorepository. These standards ensure consistency, maintainability, and modern React best practices across all React components and hooks.
+
+## Component Patterns
+
+### Functional Components
+```typescript
+// ✅ Preferred: Functional components with explicit FC type
+import type { FC } from 'react';
+import { useState, useEffect } from 'react';
+
+interface UserCardProps {
+  user: User;
+  onEdit?: (user: User) => void;
+  onDelete?: (userId: ID) => void;
+}
+
+export const UserCard: FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEdit = (): void => {
+    onEdit?.(user);
+    setIsEditing(false);
+  };
+
+  const handleDelete = (): void => {
+    onDelete?.(user.id);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <Title>{user.name}</Title>
+        <Button onClick={handleEdit}>Edit</Button>
+        <Button onClick={handleDelete} danger>Delete</Button>
+      </CardHeader>
+      <CardBody>
+        <Text>{user.email}</Text>
+      </CardBody>
+    </Card>
+  );
+};
+```
+
+### Component Organization
+```typescript
+// ✅ Preferred: Component file structure
+// UserCard.tsx
+import type { FC } from 'react';
+import { useState } from 'react';
+import type { UserCardProps } from './UserCard.types';
+import { useUserActions } from './UserCard.hooks';
+import { UserCardActions } from './UserCardActions';
+import { UserCardContent } from './UserCardContent';
+
+export const UserCard: FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const { handleEdit, handleDelete } = useUserActions({ user, onEdit, onDelete });
+
+  return (
+    <Card>
+      <UserCardContent user={user} isEditing={isEditing} />
+      <UserCardActions
+        isEditing={isEditing}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    </Card>
+  );
+};
+```
+
+## Hook Patterns
+
+### Custom Hooks
+```typescript
+// ✅ Preferred: Custom hooks with clear naming
+export const useUserData = (userId: ID) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async (): Promise<void> => {
+      try {
+        setLoading(true);
+        const userData = await api.getUser(userId);
+        setUser(userData);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [userId]);
+
+  return { user, loading, error };
+};
+
+// ✅ Preferred: Hook composition
+export const useUserActions = ({ user, onEdit, onDelete }: UserActionsProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEdit = useCallback((): void => {
+    onEdit?.(user);
+    setIsEditing(false);
+  }, [user, onEdit]);
+
+  const handleDelete = useCallback((): void => {
+    onDelete?.(user.id);
+  }, [user.id, onDelete]);
+
+  return {
+    isEditing,
+    setIsEditing,
+    handleEdit,
+    handleDelete,
+  };
+};
+```
+
+### Hook Dependencies
+```typescript
+// ✅ Preferred: Proper dependency management
+const useDataSync = (data: Data[], syncFn: (data: Data[]) => void) => {
+  useEffect(() => {
+    syncFn(data);
+  }, [data, syncFn]); // Include all dependencies
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: syncFn is intentionally stable and doesn't need to be in dependencies
+  useEffect(() => {
+    // Effect intentionally not exhaustive for specific use case
+    syncFn(data);
+  }, [data]); // Only data dependency when syncFn is stable
+};
+```
+
+## State Management
+
+### Local State
+```typescript
+// ✅ Preferred: Multiple useState calls for unrelated state
+const UserForm: FC = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  // ✅ Preferred: Complex state with useReducer
+  const [formState, dispatch] = useReducer(formReducer, initialState);
+};
+
+// ✅ Preferred: Object state for related data
+const [user, setUser] = useState<User>({
+  name: '',
+  email: '',
+  role: 'user',
+});
+
+const updateUser = (updates: Partial<User>): void => {
+  setUser(prev => ({ ...prev, ...updates }));
+};
+```
+
+### Context Usage
+```typescript
+// ✅ Preferred: Context with proper typing
+interface UserContextValue {
+  user: User | null;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => void;
+}
+
+const UserContext = createContext<UserContextValue | undefined>(undefined);
+
+export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+
+  const login = useCallback(async (credentials: LoginCredentials): Promise<void> => {
+    const userData = await api.login(credentials);
+    setUser(userData);
+  }, []);
+
+  const logout = useCallback((): void => {
+    setUser(null);
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, login, logout }),
+    [user, login, logout]
+  );
+
+  return (
+    <UserContext.Provider value={value}>
+      {children}
+    </UserContext.Provider>
+  );
+};
+
+// ✅ Preferred: Custom hook for context consumption
+export const useUser = (): UserContextValue => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('useUser must be used within UserProvider');
+  }
+  return context;
+};
+```
+
+## Event Handling
+
+### Event Handlers
+```typescript
+// ✅ Preferred: Inline handlers for simple cases
+<Button onClick={() => handleClick(id)}>Click me</Button>
+
+// ✅ Preferred: Named handlers for complex logic
+const handleSubmit = useCallback((event: FormEvent<HTMLFormElement>): void => {
+  event.preventDefault();
+
+  if (!validateForm()) {
+    setErrors(['Please fix validation errors']);
+    return;
+  }
+
+  onSubmit(formData);
+}, [formData, onSubmit]);
+
+<form onSubmit={handleSubmit}>
+  {/* form content */}
+</form>
+
+// ✅ Preferred: Handler composition
+const handleInputChange = useCallback((field: keyof FormData) =>
+  (event: ChangeEvent<HTMLInputElement>): void => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: event.target.value,
+    }));
+  }, []);
+```
+
+### Async Event Handlers
+```typescript
+// ✅ Preferred: Async handlers with proper error handling
+const handleAsyncAction = useCallback(async (): Promise<void> => {
+  try {
+    setIsLoading(true);
+    await performAsyncOperation();
+    onSuccess?.();
+  } catch (error) {
+    setError(error as Error);
+    onError?.(error as Error);
+  } finally {
+    setIsLoading(false);
+  }
+}, [onSuccess, onError]);
+```
+
+## Performance Optimization
+
+### Memoization
+```typescript
+// ✅ Preferred: Memo for expensive calculations
+const expensiveValue = useMemo(
+  () => calculateExpensiveValue(data),
+  [data]
+);
+
+// ✅ Preferred: Component memoization
+export const ExpensiveComponent = memo<ComponentProps>(({ data, onAction }) => {
+  const processedData = useMemo(
+    () => processData(data),
+    [data]
+  );
+
+  return (
+    <div>
+      {processedData.map(item => (
+        <Item key={item.id} item={item} onAction={onAction} />
+      ))}
+    </div>
+  );
+});
+```
+
+### Lazy Loading
+```typescript
+// ✅ Preferred: Lazy loading for route components
+const LazyComponent = lazy(() => import('./HeavyComponent'));
+
+// ✅ Preferred: Dynamic imports with error boundaries
+const DynamicComponent = lazy(() =>
+  import('./DynamicComponent').then(module => ({
+    default: module.DynamicComponent,
+  }))
+);
+```
+
+## Error Handling
+
+### Error States in Components
+```typescript
+// ✅ Preferred: Error handling in components
+const DataComponent: FC = () => {
+  const { data, loading, error } = useData();
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage error={error} onRetry={() => refetch()} />;
+  }
+
+  if (!data) {
+    return <EmptyState />;
+  }
+
+  return <DataDisplay data={data} />;
+};
+```
+
+## Common Anti-Patterns to Avoid
+
+### ❌ Avoid: Direct DOM manipulation
+```typescript
+// ❌ Bad
+const Component = () => {
+  useEffect(() => {
+    document.getElementById('my-element')?.focus();
+  }, []);
+
+  return <div id="my-element" />;
+};
+
+// ✅ Good
+const Component = () => {
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    elementRef.current?.focus();
+  }, []);
+
+  return <div ref={elementRef} />;
+};
+```
+
+### ❌ Avoid: Missing dependencies in useEffect
+```typescript
+// ❌ Bad
+useEffect(() => {
+  fetchData(userId);
+}, []); // Missing userId dependency
+
+// ✅ Good
+useEffect(() => {
+  fetchData(userId);
+}, [userId]); // Include all dependencies
+```
+
+## Biome Integration
+
+### Biome Ignores for React
+```typescript
+// biome-ignore lint/correctness/useExhaustiveDependencies: intended because of ...
+useEffect(() => {
+  // Effect intentionally not exhaustive
+  syncData();
+}, [data]); // Only data dependency when syncData is stable
+
+// biome-ignore lint/a11y/useKeyWithClickEvents: intended because of ...
+<div onClick={handleClick}>Clickable div</div>
+```
+
+## Package-Specific Patterns
+
+### UI Kit Components
+- Use consistent prop interfaces
+- Implement proper accessibility features
+- Follow design system guidelines
+- Use composition over configuration
+
+### Data List Components
+- Use proper data fetching patterns
+- Implement pagination and filtering
+- Handle loading and error states
+- Use proper memoization for performance
+
+### Client Components
+- Use functional components with hooks
+- Implement proper prop interfaces
+- Use composition over inheritance
+- Follow accessibility guidelines
