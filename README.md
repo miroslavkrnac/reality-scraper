@@ -9,7 +9,7 @@ A NextJS application for managing realities with a modern tech stack.
 - **Vitest** - Fast unit testing framework
 - **Ant Design** - Modern React UI component library
 - **SCSS Modules** - Modular styling
-- **Prisma ORM** - Database ORM for MySQL
+- **Prisma ORM** - Database ORM for PostgreSQL
 - **Biome** - Fast linter and formatter
 - **Knip** - Dead code elimination
 
@@ -26,7 +26,7 @@ A NextJS application for managing realities with a modern tech stack.
 ### Prerequisites
 
 - Node.js 18.0.0 or higher
-- MySQL database (for production use)
+- Docker and Docker Compose
 
 ### Installation
 
@@ -44,17 +44,17 @@ A NextJS application for managing realities with a modern tech stack.
 3. Set up environment variables:
    ```bash
    cp env.example .env
-   # Edit .env with your database connection string
    ```
 
-4. Generate Prisma client:
+4. Start PostgreSQL database:
    ```bash
-   yarn db:generate
+   yarn db:up
    ```
 
-5. Run database migrations (if using a real database):
+5. Set up database schema and seed data:
    ```bash
-   yarn db:migrate
+   yarn db:push
+   yarn db:seed
    ```
 
 ### Development
@@ -78,6 +78,19 @@ yarn test:watch
 
 ### Database Commands
 
+#### Docker Compose (PostgreSQL)
+```bash
+# Start PostgreSQL database
+yarn db:up
+
+# Stop PostgreSQL database
+yarn db:down
+
+# View database logs
+yarn db:logs
+```
+
+#### Prisma Commands
 ```bash
 # Push schema changes to database
 yarn db:push
@@ -87,6 +100,9 @@ yarn db:generate
 
 # Run migrations
 yarn db:migrate
+
+# Seed database with fake data
+yarn db:seed
 
 # Open Prisma Studio
 yarn db:studio
