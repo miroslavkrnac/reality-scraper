@@ -1,3 +1,4 @@
+import { StyleRegistry } from '@/lib/StyleRegistry';
 import type { Metadata } from 'next';
 import { ClientProviders } from './providers';
 import './globals.scss';
@@ -14,7 +15,9 @@ interface RootLayoutProps {
 const RootLayout = ({ children }: RootLayoutProps) => (
 	<html lang="en">
 		<body>
-			<ClientProviders>{children}</ClientProviders>
+			<StyleRegistry>
+				<ClientProviders>{children}</ClientProviders>
+			</StyleRegistry>
 		</body>
 	</html>
 );
