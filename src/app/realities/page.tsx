@@ -6,7 +6,7 @@ import type { Reality } from '@/types/reality.types';
 import { FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Input, Select, Space, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styles from './page.module.scss';
 
 const RealitiesPage = () => {
@@ -17,6 +17,9 @@ const RealitiesPage = () => {
 	// @NOTE: Filter state
 	const [nameFilter, setNameFilter] = useState('');
 	const [likedFilter, setLikedFilter] = useState<'all' | 'liked' | 'not-liked'>('all');
+
+	// @NOTE: Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
 
 	// @NOTE: Filtered data
 	const filteredRealities = useMemo(() => {
@@ -36,6 +39,12 @@ const RealitiesPage = () => {
 		});
 	}, [realities, nameFilter, likedFilter, isLiked]);
 
+	// @NOTE: Reset to first page when filters change
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally reset page when filters change
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [nameFilter, likedFilter]);
+
 	const handleLikeToggle = async (realityId: number) => {
 		const success = await toggleLike(realityId);
 		if (success) {
@@ -50,6 +59,7 @@ const RealitiesPage = () => {
 	const clearFilters = () => {
 		setNameFilter('');
 		setLikedFilter('all');
+		setCurrentPage(1); // @NOTE: Reset to first page when clearing filters
 	};
 
 	const columns: ColumnsType<Reality> = [
@@ -84,9 +94,6 @@ const RealitiesPage = () => {
 
 	return (
 		<div className="container">
-			<div className="page-header">
-				<h1>Realities Dashboard</h1>
-			</div>
 			<Card className={styles.tableCard}>
 				<div className={styles.tableHeader}>
 					<h2>Realities Data</h2>
@@ -135,10 +142,13 @@ const RealitiesPage = () => {
 					loading={loading}
 					rowKey="id"
 					pagination={{
+						current: currentPage,
 						pageSize: 10,
-						showSizeChanger: true,
-						showQuickJumper: true,
+						total: filteredRealities.length,
 						showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+						onChange: page => {
+							setCurrentPage(page);
+						},
 					}}
 					locale={{
 						emptyText: (
