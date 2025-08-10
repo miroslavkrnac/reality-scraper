@@ -1,29 +1,57 @@
 'use client';
 
+import { useLikedRealities } from '@/hooks/useLikedRealities';
 import { useRealities } from '@/hooks/useRealities';
 import type { Reality } from '@/types/reality.types';
-import { Card, Empty, Table } from 'antd';
+import { HeartFilled, HeartOutlined } from '@ant-design/icons';
+import { App, Button, Card, Empty, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './page.module.scss';
 
-const columns: ColumnsType<Reality> = [
-	{
-		title: 'ID',
-		dataIndex: 'id',
-		key: 'id',
-		sorter: (a, b) => a.id - b.id,
-		width: 100,
-	},
-	{
-		title: 'Name',
-		dataIndex: 'name',
-		key: 'name',
-		sorter: (a, b) => a.name.localeCompare(b.name),
-	},
-];
-
 const RealitiesPage = () => {
 	const { realities, loading, error } = useRealities();
+	const { isLiked, toggleLike, loading: likedLoading } = useLikedRealities();
+	const { message } = App.useApp();
+
+	const handleLikeToggle = async (realityId: number) => {
+		const success = await toggleLike(realityId);
+		if (success) {
+			const action = isLiked(realityId) ? 'unliked' : 'liked';
+			message.success(`Reality ${action} successfully!`);
+		} else {
+			message.error('Failed to update like status');
+		}
+	};
+
+	const columns: ColumnsType<Reality> = [
+		{
+			title: 'ID',
+			dataIndex: 'id',
+			key: 'id',
+			sorter: (a, b) => a.id - b.id,
+			width: 100,
+		},
+		{
+			title: 'Name',
+			dataIndex: 'name',
+			key: 'name',
+			sorter: (a, b) => a.name.localeCompare(b.name),
+		},
+		{
+			title: 'Actions',
+			key: 'actions',
+			width: 100,
+			render: (_, record) => (
+				<Button
+					type="text"
+					icon={isLiked(record.id) ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+					onClick={() => handleLikeToggle(record.id)}
+					loading={likedLoading}
+					className={styles.actionButton}
+				/>
+			),
+		},
+	];
 
 	return (
 		<div className="container">

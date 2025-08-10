@@ -13,6 +13,16 @@ datasource db {
 model Reality {
   id   Int    @id @default(autoincrement())
   name String
+  liked Liked[]
 
   @@map("realities")
+}
+
+model Liked {
+  id        Int @id @default(autoincrement())
+  realityId Int
+  userId    Int
+  reality   Reality @relation(fields: [realityId], references: [id])
+
+  @@map("liked")
 }

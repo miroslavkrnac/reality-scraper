@@ -1,7 +1,7 @@
 'use client';
 
 import { Navigation } from '@/components';
-import { ConfigProvider } from 'antd';
+import { App, ConfigProvider } from 'antd';
 
 interface ClientProvidersProps {
 	children: React.ReactNode;
@@ -15,7 +15,9 @@ export const ClientProviders = ({ children }: ClientProvidersProps) => (
 			},
 		}}
 	>
-		<Navigation />
-		{children}
+		<App>
+			<Navigation />
+			{children}
+		</App>
 	</ConfigProvider>
 );
