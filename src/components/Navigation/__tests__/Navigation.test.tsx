@@ -1,5 +1,5 @@
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
 import { Navigation } from '../Navigation';
 
 // @NOTE: Create a global mock function that can be accessed in tests
@@ -52,14 +52,14 @@ describe('Navigation', () => {
 		render(<Navigation />);
 
 		const collapseButton = screen.getByRole('button');
-		
+
 		// @NOTE: Initially collapsed
 		expect(screen.queryByText('Reality Scraper')).not.toBeInTheDocument();
-		
+
 		// @NOTE: Expand
 		fireEvent.click(collapseButton);
 		expect(screen.getByText('Reality Scraper')).toBeInTheDocument();
-		
+
 		// @NOTE: Collapse again
 		fireEvent.click(collapseButton);
 		expect(screen.queryByText('Reality Scraper')).not.toBeInTheDocument();

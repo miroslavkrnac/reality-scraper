@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getRealities, fetchRealities } from '../reality.utils';
 import type { RealityWithLikedUsers } from '@/types/reality.types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fetchRealities, getRealities } from '../reality.utils';
 
 // @NOTE: Mock Prisma client
 vi.mock('@/lib/db', () => {

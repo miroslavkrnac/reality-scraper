@@ -93,4 +93,26 @@
 			font-style: italic;
 		}
 	}
+
+	// @NOTE: Modal content styling
+	.modalContent {
+		.modalSection {
+			margin-bottom: 24px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+
+			h4 {
+				margin-bottom: 8px;
+				color: #1890ff;
+				font-weight: 600;
+			}
+
+			span {
+				font-size: 1rem;
+				color: #333;
+			}
+		}
+	}
 }

@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { GET, POST, DELETE } from '../liked/route';
 import type { NextRequest } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DELETE, GET, POST } from '../liked/route';
 
 // @NOTE: Mock Prisma client
 vi.mock('@/lib/db', () => {

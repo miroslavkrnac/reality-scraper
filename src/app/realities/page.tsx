@@ -3,11 +3,13 @@
 import { useLikedRealities } from '@/hooks/useLikedRealities';
 import { useRealities } from '@/hooks/useRealities';
 import type { RealityWithLikedUsers } from '@/types/reality.types';
-import { FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
-import { App, Button, Card, Empty, Input, Select, Space, Table } from 'antd';
+import { EyeOutlined, FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
+import { App, Button, Card, Empty, Input, Modal, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useMemo, useState } from 'react';
 import styles from './page.module.scss';
+
+const { Title, Text } = Typography;
 
 const RealitiesPage = () => {
 	const { realities, loading, error } = useRealities();
@@ -20,6 +22,10 @@ const RealitiesPage = () => {
 
 	// @NOTE: Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
+
+	// @NOTE: Modal state
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [selectedReality, setSelectedReality] = useState<RealityWithLikedUsers | null>(null);
 
 	// @NOTE: Filtered data
 	const filteredRealities = useMemo(() => {
@@ -49,6 +55,33 @@ const RealitiesPage = () => {
 		const success = await toggleLike(realityId);
 		if (success) {
 			const action = isLiked(realityId) ? 'unliked' : 'liked';
+			message.success(`Reality ${action} successfully!`);
+		} else {
+			message.error('Failed to update like status');
+		}
+	};
+
+	// @NOTE: Handle view reality details
+	const handleViewReality = (reality: RealityWithLikedUsers) => {
+		setSelectedReality(reality);
+		setIsModalVisible(true);
+	};
+
+	// @NOTE: Handle modal close
+	const handleModalClose = () => {
+		setIsModalVisible(false);
+		setSelectedReality(null);
+	};
+
+	// @NOTE: Handle like toggle in modal
+	const handleModalLikeToggle = async () => {
+		if (!selectedReality) {
+			return;
+		}
+
+		const success = await toggleLike(selectedReality.id);
+		if (success) {
+			const action = isLiked(selectedReality.id) ? 'unliked' : 'liked';
 			message.success(`Reality ${action} successfully!`);
 		} else {
 			message.error('Failed to update like status');
@@ -98,15 +131,25 @@ const RealitiesPage = () => {
 		{
 			title: 'Actions',
 			key: 'actions',
-			width: 100,
+			width: 150,
 			render: (_, record) => (
-				<Button
-					type="text"
-					icon={isLiked(record.id) ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
-					onClick={() => handleLikeToggle(record.id)}
-					loading={likedLoading}
-					className={styles.actionButton}
-				/>
+				<Space>
+					<Button
+						type="text"
+						icon={<EyeOutlined />}
+						onClick={() => handleViewReality(record)}
+						className={styles.actionButton}
+						title="View details"
+					/>
+					<Button
+						type="text"
+						icon={isLiked(record.id) ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+						onClick={() => handleLikeToggle(record.id)}
+						loading={likedLoading}
+						className={styles.actionButton}
+						title={isLiked(record.id) ? 'Unlike' : 'Like'}
+					/>
+				</Space>
 			),
 		},
 	];
@@ -187,6 +230,45 @@ const RealitiesPage = () => {
 					className={styles.table}
 				/>
 			</Card>
+
+			{/* @NOTE: Reality Details Modal */}
+			<Modal
+				title="Reality Details"
+				open={isModalVisible}
+				onCancel={handleModalClose}
+				footer={false}
+				width={500}
+			>
+				{selectedReality && (
+					<div className={styles.modalContent}>
+						<div className={styles.modalSection}>
+							<Title level={4}>Name</Title>
+							<Text>{selectedReality.name}</Text>
+						</div>
+
+						<div className={styles.modalSection}>
+							<Title level={4}>ID</Title>
+							<Text>{selectedReality.id}</Text>
+						</div>
+
+						<div className={styles.modalSection}>
+							<Title level={4}>Actions</Title>
+							<Button
+								type="primary"
+								icon={isLiked(selectedReality.id) ? <HeartFilled /> : <HeartOutlined />}
+								onClick={handleModalLikeToggle}
+								loading={likedLoading}
+								style={{
+									backgroundColor: isLiked(selectedReality.id) ? '#ff4d4f' : undefined,
+									borderColor: isLiked(selectedReality.id) ? '#ff4d4f' : undefined,
+								}}
+							>
+								{isLiked(selectedReality.id) ? 'Unlike' : 'Like'}
+							</Button>
+						</div>
+					</div>
+				)}
+			</Modal>
 		</div>
 	);
 };
