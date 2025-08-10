@@ -232,13 +232,7 @@ const RealitiesPage = () => {
 			</Card>
 
 			{/* @NOTE: Reality Details Modal */}
-			<Modal
-				title="Reality Details"
-				open={isModalVisible}
-				onCancel={handleModalClose}
-				footer={false}
-				width={500}
-			>
+			<Modal title="Reality Details" open={isModalVisible} onCancel={handleModalClose} footer={false} width={500}>
 				{selectedReality && (
 					<div className={styles.modalContent}>
 						<div className={styles.modalSection}>
