@@ -3,15 +3,38 @@
 import { useLikedRealities } from '@/hooks/useLikedRealities';
 import { useRealities } from '@/hooks/useRealities';
 import type { Reality } from '@/types/reality.types';
-import { HeartFilled, HeartOutlined } from '@ant-design/icons';
-import { App, Button, Card, Empty, Table } from 'antd';
+import { FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
+import { App, Button, Card, Empty, Input, Select, Space, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { useMemo, useState } from 'react';
 import styles from './page.module.scss';
 
 const RealitiesPage = () => {
 	const { realities, loading, error } = useRealities();
 	const { isLiked, toggleLike, loading: likedLoading } = useLikedRealities();
 	const { message } = App.useApp();
+
+	// @NOTE: Filter state
+	const [nameFilter, setNameFilter] = useState('');
+	const [likedFilter, setLikedFilter] = useState<'all' | 'liked' | 'not-liked'>('all');
+
+	// @NOTE: Filtered data
+	const filteredRealities = useMemo(() => {
+		return realities.filter(reality => {
+			// @NOTE: Name filter
+			const matchesName = reality.name.toLowerCase().includes(nameFilter.toLowerCase());
+
+			// @NOTE: Liked filter
+			let matchesLiked = true;
+			if (likedFilter === 'liked') {
+				matchesLiked = isLiked(reality.id);
+			} else if (likedFilter === 'not-liked') {
+				matchesLiked = !isLiked(reality.id);
+			}
+
+			return matchesName && matchesLiked;
+		});
+	}, [realities, nameFilter, likedFilter, isLiked]);
 
 	const handleLikeToggle = async (realityId: number) => {
 		const success = await toggleLike(realityId);
@@ -21,6 +44,12 @@ const RealitiesPage = () => {
 		} else {
 			message.error('Failed to update like status');
 		}
+	};
+
+	// @NOTE: Clear all filters
+	const clearFilters = () => {
+		setNameFilter('');
+		setLikedFilter('all');
 	};
 
 	const columns: ColumnsType<Reality> = [
@@ -64,9 +93,45 @@ const RealitiesPage = () => {
 					<p>Complete list of all available realities</p>
 					{error && <p style={{ color: 'red', marginTop: '8px' }}>⚠️ {error}</p>}
 				</div>
+
+				{/* @NOTE: Filter Section */}
+				<div className={styles.filterSection}>
+					<Space wrap>
+						<Input
+							placeholder="Filter by name..."
+							value={nameFilter}
+							onChange={e => setNameFilter(e.target.value)}
+							style={{ width: 200 }}
+							allowClear
+						/>
+						<Select
+							value={likedFilter}
+							onChange={setLikedFilter}
+							style={{ width: 150 }}
+							options={[
+								{ value: 'all', label: 'All Realities' },
+								{ value: 'liked', label: 'Liked Only' },
+								{ value: 'not-liked', label: 'Not Liked' },
+							]}
+						/>
+						<Button
+							icon={<FilterOutlined />}
+							onClick={clearFilters}
+							disabled={nameFilter === '' && likedFilter === 'all'}
+						>
+							Clear Filters
+						</Button>
+					</Space>
+					{(nameFilter || likedFilter !== 'all') && (
+						<div className={styles.filterInfo}>
+							Showing {filteredRealities.length} of {realities.length} realities
+						</div>
+					)}
+				</div>
+
 				<Table
 					columns={columns}
-					dataSource={realities}
+					dataSource={filteredRealities}
 					loading={loading}
 					rowKey="id"
 					pagination={{
@@ -80,7 +145,11 @@ const RealitiesPage = () => {
 							<div style={{ padding: '40px 20px', textAlign: 'center' }}>
 								<Empty
 									image={Empty.PRESENTED_IMAGE_SIMPLE}
-									description="No realities found"
+									description={
+										nameFilter || likedFilter !== 'all'
+											? 'No realities match your filters'
+											: 'No realities found'
+									}
 									style={{ margin: 0 }}
 								/>
 							</div>

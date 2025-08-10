@@ -79,4 +79,18 @@
 			font-size: 16px;
 		}
 	}
+
+	// @NOTE: Filter section styling
+	.filterSection {
+		padding: 16px 24px;
+		border-bottom: 1px solid #f0f0f0;
+		background: #fafafa;
+
+		.filterInfo {
+			margin-top: 12px;
+			font-size: 0.9rem;
+			color: #666;
+			font-style: italic;
+		}
+	}
 }
