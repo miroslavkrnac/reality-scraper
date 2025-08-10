@@ -2,7 +2,7 @@
 
 import { useLikedRealities } from '@/hooks/useLikedRealities';
 import { useRealities } from '@/hooks/useRealities';
-import type { Reality } from '@/types/reality.types';
+import type { RealityWithLikedUsers } from '@/types/reality.types';
 import { FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Input, Select, Space, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -62,7 +62,7 @@ const RealitiesPage = () => {
 		setCurrentPage(1); // @NOTE: Reset to first page when clearing filters
 	};
 
-	const columns: ColumnsType<Reality> = [
+	const columns: ColumnsType<RealityWithLikedUsers> = [
 		{
 			title: 'ID',
 			dataIndex: 'id',
@@ -75,6 +75,25 @@ const RealitiesPage = () => {
 			dataIndex: 'name',
 			key: 'name',
 			sorter: (a, b) => a.name.localeCompare(b.name),
+		},
+		{
+			title: 'Liked by',
+			key: 'likedBy',
+			width: 200,
+			render: (_, record) => {
+				const likedUsers = record.liked.map(like => like.user.name);
+				if (likedUsers.length === 0) {
+					return <span style={{ color: '#999', fontStyle: 'italic' }}>No likes</span>;
+				}
+				if (likedUsers.length <= 2) {
+					return <span>{likedUsers.join(', ')}</span>;
+				}
+				return (
+					<span>
+						{likedUsers.slice(0, 2).join(', ')} and {likedUsers.length - 2} more
+					</span>
+				);
+			},
 		},
 		{
 			title: 'Actions',

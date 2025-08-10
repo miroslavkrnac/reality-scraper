@@ -1,9 +1,9 @@
-import type { Reality } from '@/types/reality.types';
+import type { RealityWithLikedUsers } from '@/types/reality.types';
 import { fetchRealities } from '@/utils/reality.utils';
 import useSWR from 'swr';
 
 // @NOTE: SWR fetcher function
-const realitiesFetcher = async (): Promise<Reality[]> => {
+const realitiesFetcher = async (): Promise<RealityWithLikedUsers[]> => {
 	return await fetchRealities();
 };
 

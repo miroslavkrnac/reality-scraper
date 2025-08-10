@@ -1,7 +1,7 @@
 import { getLikedRealities, likeReality, unlikeReality } from '@/utils/liked.utils';
 import { useEffect, useState } from 'react';
 
-export const useLikedRealities = (userId = 1) => {
+export const useLikedRealities = (userId = 21) => {
 	const [likedRealityIds, setLikedRealityIds] = useState<number[]>([]);
 	const [loading, setLoading] = useState(true);
 
