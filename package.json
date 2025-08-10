@@ -30,6 +30,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.5.3",
+		"@testing-library/jest-dom": "^6.6.4",
 		"@testing-library/react": "^14.1.2",
 		"@types/node": "^22",
 		"@types/react": "^18.3.0",
