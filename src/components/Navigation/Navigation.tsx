@@ -24,6 +24,12 @@ const items: MenuItem[] = [
 export const Navigation = () => {
 	const pathname = usePathname();
 	const [collapsed, setCollapsed] = useState(true);
+	const [mounted, setMounted] = useState(false);
+
+	// @NOTE: Ensure component is mounted before rendering
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	const toggleCollapsed = () => {
 		setCollapsed(!collapsed);
@@ -43,6 +49,22 @@ export const Navigation = () => {
 		};
 	}, [collapsed]);
 
+	// @NOTE: Don't render until mounted to prevent hydration issues
+	if (!mounted) {
+		return (
+			<nav className={`${styles.navigation} ${styles.collapsed}`}>
+				<div className={styles.logoSection}>
+					<Button
+						type="text"
+						icon={<MenuUnfoldOutlined />}
+						className={styles.collapseButton}
+						disabled
+					/>
+				</div>
+			</nav>
+		);
+	}
+
 	return (
 		<nav className={`${styles.navigation} ${collapsed ? styles.collapsed : ''}`}>
 			<div className={styles.logoSection}>
@@ -59,8 +81,10 @@ export const Navigation = () => {
 				items={items}
 				className={styles.menu}
 				theme="light"
-				selectedKeys={[pathname]}
+				selectedKeys={pathname ? [pathname] : []}
 				inlineCollapsed={collapsed}
+				// @NOTE: Add key to force re-render on pathname change
+				key={pathname}
 			/>
 		</nav>
 	);

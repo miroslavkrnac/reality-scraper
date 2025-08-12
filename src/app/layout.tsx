@@ -6,6 +6,9 @@ import './globals.scss';
 export const metadata: Metadata = {
 	title: 'Reality Scraper',
 	description: 'A NextJS application for managing realities',
+	icons: {
+		icon: '/icon.svg',
+	},
 };
 
 interface RootLayoutProps {
