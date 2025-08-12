@@ -1,6 +1,9 @@
+export type RealityType = 'FLAT_PERSONAL' | 'FLAT_INVESTMENT' | 'LAND_PERSONAL' | 'LAND_INVESTMENT';
+
 export interface Reality {
 	id: number;
 	name: string;
+	type: RealityType;
 }
 
 export interface User {

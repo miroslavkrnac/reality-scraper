@@ -19,9 +19,17 @@ model User {
   @@map("users")
 }
 
+enum RealityType {
+  FLAT_PERSONAL
+  FLAT_INVESTMENT
+  LAND_PERSONAL
+  LAND_INVESTMENT
+}
+
 model Reality {
-  id   Int    @id @default(autoincrement())
+  id   Int         @id @default(autoincrement())
   name String
+  type RealityType @default(FLAT_PERSONAL)
   liked Liked[]
 
   @@map("realities")

@@ -52,6 +52,7 @@ describe('RealitiesPage', () => {
 		{
 			id: 1,
 			name: 'Test Reality 1',
+			type: 'FLAT_PERSONAL',
 			liked: [
 				{
 					user: {
@@ -65,6 +66,7 @@ describe('RealitiesPage', () => {
 		{
 			id: 2,
 			name: 'Test Reality 2',
+			type: 'FLAT_INVESTMENT',
 			liked: [],
 		},
 	];
@@ -142,11 +144,33 @@ describe('RealitiesPage', () => {
 
 		render(<RealitiesPage />);
 
-		const likedSelect = screen.getByRole('combobox');
+		const likedSelects = screen.getAllByRole('combobox');
+		const likedSelect = likedSelects[0]; // @NOTE: First combobox is the liked filter
 		fireEvent.mouseDown(likedSelect);
 
 		const likedOption = screen.getByText('Liked Only');
 		fireEvent.click(likedOption);
+
+		await waitFor(() => {
+			expect(screen.getByText('Test Reality 1')).toBeInTheDocument();
+			expect(screen.queryByText('Test Reality 2')).not.toBeInTheDocument();
+		});
+	});
+
+	it('should filter realities by type', async () => {
+		render(<RealitiesPage />);
+
+		const typeSelects = screen.getAllByRole('combobox');
+		const typeSelect = typeSelects[1]; // @NOTE: Second combobox is the type filter
+		fireEvent.mouseDown(typeSelect);
+
+		const typeOptions = screen.getAllByText('Flat Personal');
+		const typeOption = typeOptions.find(
+			option => option.closest('.ant-select-item-option-content') || option.closest('.ant-select-dropdown'),
+		);
+		if (typeOption) {
+			fireEvent.click(typeOption);
+		}
 
 		await waitFor(() => {
 			expect(screen.getByText('Test Reality 1')).toBeInTheDocument();

@@ -2,7 +2,7 @@
 
 import { useLikedRealities } from '@/hooks/useLikedRealities';
 import { useRealities } from '@/hooks/useRealities';
-import type { RealityWithLikedUsers } from '@/types/reality.types';
+import type { RealityType, RealityWithLikedUsers } from '@/types/reality.types';
 import { EyeOutlined, FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Input, Modal, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -19,6 +19,7 @@ const RealitiesPage = () => {
 	// @NOTE: Filter state
 	const [nameFilter, setNameFilter] = useState('');
 	const [likedFilter, setLikedFilter] = useState<'all' | 'liked' | 'not-liked'>('all');
+	const [typeFilter, setTypeFilter] = useState<'all' | RealityType>('all');
 
 	// @NOTE: Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
@@ -41,15 +42,18 @@ const RealitiesPage = () => {
 				matchesLiked = !isLiked(reality.id);
 			}
 
-			return matchesName && matchesLiked;
+			// @NOTE: Type filter
+			const matchesType = typeFilter === 'all' || reality.type === typeFilter;
+
+			return matchesName && matchesLiked && matchesType;
 		});
-	}, [realities, nameFilter, likedFilter, isLiked]);
+	}, [realities, nameFilter, likedFilter, typeFilter, isLiked]);
 
 	// @NOTE: Reset to first page when filters change
 	// biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally reset page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [nameFilter, likedFilter]);
+	}, [nameFilter, likedFilter, typeFilter]);
 
 	const handleLikeToggle = async (realityId: number) => {
 		const success = await toggleLike(realityId);
@@ -92,6 +96,7 @@ const RealitiesPage = () => {
 	const clearFilters = () => {
 		setNameFilter('');
 		setLikedFilter('all');
+		setTypeFilter('all');
 		setCurrentPage(1); // @NOTE: Reset to first page when clearing filters
 	};
 
@@ -108,6 +113,21 @@ const RealitiesPage = () => {
 			dataIndex: 'name',
 			key: 'name',
 			sorter: (a, b) => a.name.localeCompare(b.name),
+		},
+		{
+			title: 'Type',
+			dataIndex: 'type',
+			key: 'type',
+			width: 150,
+			render: (type: RealityType) => {
+				const typeLabels = {
+					FLAT_PERSONAL: 'Flat Personal',
+					FLAT_INVESTMENT: 'Flat Investment',
+					LAND_PERSONAL: 'Land Personal',
+					LAND_INVESTMENT: 'Land Investment',
+				};
+				return typeLabels[type];
+			},
 		},
 		{
 			title: 'Liked by',
@@ -183,15 +203,27 @@ const RealitiesPage = () => {
 								{ value: 'not-liked', label: 'Not Liked' },
 							]}
 						/>
+						<Select
+							value={typeFilter}
+							onChange={setTypeFilter}
+							style={{ width: 180 }}
+							options={[
+								{ value: 'all', label: 'All Types' },
+								{ value: 'FLAT_PERSONAL', label: 'Flat Personal' },
+								{ value: 'FLAT_INVESTMENT', label: 'Flat Investment' },
+								{ value: 'LAND_PERSONAL', label: 'Land Personal' },
+								{ value: 'LAND_INVESTMENT', label: 'Land Investment' },
+							]}
+						/>
 						<Button
 							icon={<FilterOutlined />}
 							onClick={clearFilters}
-							disabled={nameFilter === '' && likedFilter === 'all'}
+							disabled={nameFilter === '' && likedFilter === 'all' && typeFilter === 'all'}
 						>
 							Clear Filters
 						</Button>
 					</Space>
-					{(nameFilter || likedFilter !== 'all') && (
+					{(nameFilter || likedFilter !== 'all' || typeFilter !== 'all') && (
 						<div className={styles.filterInfo}>
 							Showing {filteredRealities.length} of {realities.length} realities
 						</div>
@@ -218,7 +250,7 @@ const RealitiesPage = () => {
 								<Empty
 									image={Empty.PRESENTED_IMAGE_SIMPLE}
 									description={
-										nameFilter || likedFilter !== 'all'
+										nameFilter || likedFilter !== 'all' || typeFilter !== 'all'
 											? 'No realities match your filters'
 											: 'No realities found'
 									}
@@ -243,6 +275,21 @@ const RealitiesPage = () => {
 						<div className={styles.modalSection}>
 							<Title level={4}>ID</Title>
 							<Text>{selectedReality.id}</Text>
+						</div>
+
+						<div className={styles.modalSection}>
+							<Title level={4}>Type</Title>
+							<Text>
+								{(() => {
+									const typeLabels = {
+										FLAT_PERSONAL: 'Flat Personal',
+										FLAT_INVESTMENT: 'Flat Investment',
+										LAND_PERSONAL: 'Land Personal',
+										LAND_INVESTMENT: 'Land Investment',
+									};
+									return typeLabels[selectedReality.type];
+								})()}
+							</Text>
 						</div>
 
 						<div className={styles.modalSection}>
