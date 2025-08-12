@@ -7,19 +7,14 @@ let browserInstance: Browser | null = null;
 const getBrowser = async () => {
 	if (!browserInstance) {
 		browserInstance = await puppeteer.launch({
-			headless: 'shell',
+			headless: false,
 			executablePath:
 				process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 			args: [
 				'--no-sandbox',
 				'--disable-setuid-sandbox',
 				'--disable-dev-shm-usage',
-				'--disable-accelerated-2d-canvas',
-				'--no-first-run',
-				'--no-zygote',
-				'--single-process',
-				'--disable-gpu',
-				'--disable-web-security',
+				'--disable-blink-features=AutomationControlled',
 				'--disable-features=VizDisplayCompositor',
 				'--disable-background-timer-throttling',
 				'--disable-backgrounding-occluded-windows',
@@ -34,11 +29,11 @@ const getBrowser = async () => {
 				'--disable-sync',
 				'--disable-translate',
 				'--disable-background-networking',
-				'--disable-background-timer-throttling',
 				'--disable-client-side-phishing-detection',
 				'--disable-component-update',
 				'--disable-domain-reliability',
 				'--disable-ipc-flooding-protection',
+				'--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 			],
 		});
 	}
@@ -55,28 +50,76 @@ export const scrapePage = async (
 
 	try {
 		log('Scraping page', url);
-		// Set faster page loading
-		page.setDefaultNavigationTimeout(10000);
-		page.setDefaultTimeout(10000);
-
-		// Block unnecessary resources
-		await page.setRequestInterception(true);
-		page.on('request', req => {
-			if (
-				req.resourceType() === 'stylesheet' ||
-				req.resourceType() === 'font' ||
-				req.resourceType() === 'image'
-			) {
-				req.abort();
-			} else {
-				req.continue();
-			}
+		
+		// @NOTE: Set anti-detection measures
+		await page.evaluateOnNewDocument(() => {
+			// @NOTE: Remove webdriver property
+			(navigator as any).webdriver = undefined;
+			
+			// @NOTE: Override plugins to look more human
+			Object.defineProperty(navigator, 'plugins', {
+				get: () => [1, 2, 3, 4, 5],
+			});
+			
+			// @NOTE: Override languages
+			Object.defineProperty(navigator, 'languages', {
+				get: () => ['cs-CZ', 'cs', 'en'],
+			});
+			
+			// @NOTE: Override permissions
+			const originalQuery = window.navigator.permissions.query;
+			window.navigator.permissions.query = (parameters: any) => {
+				if (parameters.name === 'notifications') {
+					return Promise.resolve({ 
+						state: Notification.permission,
+						name: 'notifications',
+						onchange: null,
+						addEventListener: () => {
+							// @NOTE: Empty implementation for anti-detection
+						},
+						removeEventListener: () => {
+							// @NOTE: Empty implementation for anti-detection
+						},
+						dispatchEvent: () => true,
+					} as PermissionStatus);
+				}
+				return originalQuery(parameters);
+			};
+			
+			// @NOTE: Override chrome runtime
+			(window as any).chrome = {
+				runtime: {},
+			};
+			
+			// @NOTE: Override permissions API
+			Object.defineProperty(navigator, 'permissions', {
+				get: () => ({
+					query: window.navigator.permissions.query,
+				}),
+			});
 		});
+
+		// @NOTE: Set realistic viewport
+		await page.setViewport({
+			width: 1920,
+			height: 1080,
+			deviceScaleFactor: 1,
+		});
+
+		// @NOTE: Set user agent
+		await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+		// @NOTE: Set longer timeouts for better reliability
+		page.setDefaultNavigationTimeout(30000);
+		page.setDefaultTimeout(30000);
 
 		await page.goto(url, {
-			waitUntil: 'domcontentloaded',
-			timeout: 10000,
+			waitUntil: 'networkidle2',
+			timeout: 30000,
 		});
+
+		// @NOTE: Wait a bit for any dynamic content to load
+		await sleep(2000 + Math.random() * 3000); // @NOTE: Random delay to appear more human
 
 		const result = await evaluate(page);
 
@@ -96,7 +139,12 @@ export const scrapePage = async (
 		log('Scraping failed for', url, error);
 		return 0;
 	} finally {
-		await page.close();
+		try {
+			await page.close();
+		} catch (closeError) {
+			// @NOTE: Ignore close errors as the page might already be closed
+			log('Page close error (ignored):', closeError);
+		}
 	}
 };
 
