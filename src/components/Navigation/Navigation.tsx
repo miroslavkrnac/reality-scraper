@@ -1,4 +1,4 @@
-import { HomeOutlined, MenuFoldOutlined, MenuUnfoldOutlined, TableOutlined } from '@ant-design/icons';
+import { MenuFoldOutlined, MenuUnfoldOutlined, TableOutlined } from '@ant-design/icons';
 import { Button, Menu } from 'antd';
 import type { MenuProps } from 'antd';
 import Link from 'next/link';
@@ -9,11 +9,6 @@ import styles from './Navigation.module.scss';
 type MenuItem = Required<MenuProps>['items'][number];
 
 const items: MenuItem[] = [
-	{
-		key: '/',
-		icon: <HomeOutlined />,
-		label: <Link href="/">Home</Link>,
-	},
 	{
 		key: '/realities',
 		icon: <TableOutlined />,

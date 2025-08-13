@@ -44,7 +44,6 @@ describe('Navigation', () => {
 	it('should render all navigation links', () => {
 		render(<Navigation />);
 
-		expect(screen.getByText('Home')).toBeInTheDocument();
 		expect(screen.getByText('Realities')).toBeInTheDocument();
 	});
 

@@ -302,26 +302,81 @@ const RealitiesPage = () => {
 							{/* @NOTE: Left Column - Property Details */}
 							<div style={{ flex: 1 }}>
 								<div className={styles.modalSection}>
-									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>Property Information</Title>
-									
+									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>
+										Property Information
+									</Title>
+
 									<div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-											<Text strong style={{ color: '#666' }}>Title:</Text>
-											<Text style={{ textAlign: 'right', maxWidth: '60%' }}>{selectedReality.title}</Text>
+										<div
+											style={{
+												display: 'flex',
+												justifyContent: 'space-between',
+												alignItems: 'center',
+												padding: '12px',
+												backgroundColor: '#f8f9fa',
+												borderRadius: '8px',
+											}}
+										>
+											<Text strong style={{ color: '#666' }}>
+												Title:
+											</Text>
+											<Text style={{ textAlign: 'right', maxWidth: '60%' }}>
+												{selectedReality.title}
+											</Text>
 										</div>
-										
-										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-											<Text strong style={{ color: '#666' }}>Location:</Text>
-											<Text style={{ textAlign: 'right', maxWidth: '60%' }}>{selectedReality.location}</Text>
+
+										<div
+											style={{
+												display: 'flex',
+												justifyContent: 'space-between',
+												alignItems: 'center',
+												padding: '12px',
+												backgroundColor: '#f8f9fa',
+												borderRadius: '8px',
+											}}
+										>
+											<Text strong style={{ color: '#666' }}>
+												Location:
+											</Text>
+											<Text style={{ textAlign: 'right', maxWidth: '60%' }}>
+												{selectedReality.location}
+											</Text>
 										</div>
-										
-										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-											<Text strong style={{ color: '#666' }}>Price:</Text>
-											<Text strong style={{ textAlign: 'right', color: '#52c41a', fontSize: '16px' }}>{selectedReality.price}</Text>
+
+										<div
+											style={{
+												display: 'flex',
+												justifyContent: 'space-between',
+												alignItems: 'center',
+												padding: '12px',
+												backgroundColor: '#f8f9fa',
+												borderRadius: '8px',
+											}}
+										>
+											<Text strong style={{ color: '#666' }}>
+												Price:
+											</Text>
+											<Text
+												strong
+												style={{ textAlign: 'right', color: '#52c41a', fontSize: '16px' }}
+											>
+												{selectedReality.price}
+											</Text>
 										</div>
-										
-										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-											<Text strong style={{ color: '#666' }}>Type:</Text>
+
+										<div
+											style={{
+												display: 'flex',
+												justifyContent: 'space-between',
+												alignItems: 'center',
+												padding: '12px',
+												backgroundColor: '#f8f9fa',
+												borderRadius: '8px',
+											}}
+										>
+											<Text strong style={{ color: '#666' }}>
+												Type:
+											</Text>
 											<Text style={{ textAlign: 'right' }}>
 												{(() => {
 													const typeLabels = {
@@ -341,16 +396,40 @@ const RealitiesPage = () => {
 							{/* @NOTE: Right Column - Technical Details & Actions */}
 							<div style={{ flex: 1 }}>
 								<div className={styles.modalSection}>
-									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>Technical Details</Title>
-									
+									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>
+										Technical Details
+									</Title>
+
 									<div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-											<Text strong style={{ color: '#666' }}>ID:</Text>
+										<div
+											style={{
+												display: 'flex',
+												justifyContent: 'space-between',
+												alignItems: 'center',
+												padding: '12px',
+												backgroundColor: '#f8f9fa',
+												borderRadius: '8px',
+											}}
+										>
+											<Text strong style={{ color: '#666' }}>
+												ID:
+											</Text>
 											<Text style={{ textAlign: 'right' }}>{selectedReality.id}</Text>
 										</div>
-										
-										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-											<Text strong style={{ color: '#666' }}>Reality ID:</Text>
+
+										<div
+											style={{
+												display: 'flex',
+												justifyContent: 'space-between',
+												alignItems: 'center',
+												padding: '12px',
+												backgroundColor: '#f8f9fa',
+												borderRadius: '8px',
+											}}
+										>
+											<Text strong style={{ color: '#666' }}>
+												Reality ID:
+											</Text>
 											<Text style={{ textAlign: 'right' }}>{selectedReality.reality_id}</Text>
 										</div>
 									</div>
@@ -358,8 +437,10 @@ const RealitiesPage = () => {
 
 								{/* @NOTE: Actions Section */}
 								<div className={styles.modalSection}>
-									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>Actions</Title>
-									
+									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>
+										Actions
+									</Title>
+
 									<div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 										<Button
 											type="primary"
@@ -376,7 +457,7 @@ const RealitiesPage = () => {
 										>
 											View Property on Sreality.cz
 										</Button>
-										
+
 										<Button
 											type={isLiked(selectedReality.id) ? 'primary' : 'default'}
 											icon={isLiked(selectedReality.id) ? <HeartFilled /> : <HeartOutlined />}
@@ -391,8 +472,15 @@ const RealitiesPage = () => {
 										>
 											{isLiked(selectedReality.id) ? 'Unlike' : 'Like'}
 										</Button>
-										
-										<div style={{ fontSize: '12px', color: '#999', textAlign: 'center', marginTop: '8px' }}>
+
+										<div
+											style={{
+												fontSize: '12px',
+												color: '#999',
+												textAlign: 'center',
+												marginTop: '8px',
+											}}
+										>
 											Opens in a new tab
 										</div>
 									</div>
