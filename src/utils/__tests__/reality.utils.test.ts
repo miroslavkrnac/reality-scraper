@@ -27,12 +27,24 @@ describe('reality.utils', () => {
 			const mockRealities: RealityWithLikedUsers[] = [
 				{
 					id: 1,
-					name: 'Test Reality 1',
+					link: '/detail/test1',
+					img_src: 'https://example.com/img1.jpg',
+					title: 'Test Reality 1',
+					location: 'Test Location 1',
+					price: '1,000,000 Kč',
+					reality_id: 'test1',
+					type: 'FLAT_PERSONAL',
 					liked: [],
 				},
 				{
 					id: 2,
-					name: 'Test Reality 2',
+					link: '/detail/test2',
+					img_src: 'https://example.com/img2.jpg',
+					title: 'Test Reality 2',
+					location: 'Test Location 2',
+					price: '2,000,000 Kč',
+					reality_id: 'test2',
+					type: 'FLAT_INVESTMENT',
 					liked: [],
 				},
 			];
@@ -76,7 +88,13 @@ describe('reality.utils', () => {
 			const mockRealities: RealityWithLikedUsers[] = [
 				{
 					id: 1,
-					name: 'Test Reality 1',
+					link: '/detail/test1',
+					img_src: 'https://example.com/img1.jpg',
+					title: 'Test Reality 1',
+					location: 'Test Location 1',
+					price: '1,000,000 Kč',
+					reality_id: 'test1',
+					type: 'FLAT_PERSONAL',
 					liked: [],
 				},
 			];

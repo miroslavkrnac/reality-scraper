@@ -54,12 +54,7 @@ export const Navigation = () => {
 		return (
 			<nav className={`${styles.navigation} ${styles.collapsed}`}>
 				<div className={styles.logoSection}>
-					<Button
-						type="text"
-						icon={<MenuUnfoldOutlined />}
-						className={styles.collapseButton}
-						disabled
-					/>
+					<Button type="text" icon={<MenuUnfoldOutlined />} className={styles.collapseButton} disabled />
 				</div>
 			</nav>
 		);

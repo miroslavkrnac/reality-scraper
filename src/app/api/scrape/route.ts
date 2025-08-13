@@ -1,16 +1,28 @@
+import type { RealityType } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { db } from '../../../lib/db';
 import { scrapePage } from '../../../scraper/scraper.utils';
 import { log } from '../../../utils/logger';
 
 export async function POST(request: Request): Promise<NextResponse> {
 	try {
-		const { url } = await request.json();
+		const { url, type } = await request.json();
 
 		if (!url || typeof url !== 'string') {
 			return NextResponse.json(
 				{
 					success: false,
 					error: 'URL is required and must be a string',
+				},
+				{ status: 400 },
+			);
+		}
+
+		if (!type || !['FLAT_PERSONAL', 'FLAT_INVESTMENT', 'LAND_PERSONAL', 'LAND_INVESTMENT'].includes(type)) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: 'Type is required and must be one of: FLAT_PERSONAL, FLAT_INVESTMENT, LAND_PERSONAL, LAND_INVESTMENT',
 				},
 				{ status: 400 },
 			);
@@ -50,7 +62,10 @@ export async function POST(request: Request): Promise<NextResponse> {
 						'[data-e2e="estates-list"] > li:not([id^="estate-list-native-"])',
 					);
 					return Array.from(estateElements).map(estate => ({
-						id: estate.getAttribute('id')?.replace('estate-list-item-', '').replace(/region-tip-item-\d+-/gmi, ""),
+						id: estate
+							.getAttribute('id')
+							?.replace('estate-list-item-', '')
+							.replace(/region-tip-item-\d+-/gim, ''),
 						link: estate.querySelector('a')?.getAttribute('href') || undefined,
 						img: estate.querySelector('img:nth-of-type(2)')?.getAttribute('src')?.replace('//', 'https://'),
 						title: estate.querySelector('a p:first-of-type')?.textContent?.trim(),
@@ -95,11 +110,47 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 		log('Scraping completed successfully');
 
+		// @NOTE: Save scraped data to database
+		const savedEstates = [];
+		for (const estate of allEstates) {
+			if (estate.id && estate.link && estate.title && estate.location && estate.price) {
+				try {
+					const savedEstate = await db.reality.upsert({
+						where: { reality_id: estate.id },
+						update: {
+							link: estate.link,
+							img_src: estate.img,
+							title: estate.title,
+							location: estate.location,
+							price: estate.price,
+							type: type as RealityType,
+						},
+						create: {
+							link: estate.link,
+							img_src: estate.img,
+							title: estate.title,
+							location: estate.location,
+							price: estate.price,
+							reality_id: estate.id,
+							type: type as RealityType,
+						},
+					});
+					savedEstates.push(savedEstate);
+				} catch (error) {
+					log('Error saving estate:', error);
+				}
+			}
+		}
+
+		log(`Saved ${savedEstates.length} estates to database`);
+
 		return NextResponse.json({
 			success: true,
 			data: {
 				url,
+				type,
 				estates: allEstates,
+				savedCount: savedEstates.length,
 				timestamp: new Date().toISOString(),
 			},
 		});

@@ -51,7 +51,12 @@ describe('RealitiesPage', () => {
 	const mockRealities: RealityWithLikedUsers[] = [
 		{
 			id: 1,
-			name: 'Test Reality 1',
+			link: '/detail/test1',
+			img_src: 'https://example.com/img1.jpg',
+			title: 'Test Reality 1',
+			location: 'Test Location 1',
+			price: '1,000,000 Kč',
+			reality_id: 'test1',
 			type: 'FLAT_PERSONAL',
 			liked: [
 				{
@@ -65,7 +70,12 @@ describe('RealitiesPage', () => {
 		},
 		{
 			id: 2,
-			name: 'Test Reality 2',
+			link: '/detail/test2',
+			img_src: 'https://example.com/img2.jpg',
+			title: 'Test Reality 2',
+			location: 'Test Location 2',
+			price: '2,000,000 Kč',
+			reality_id: 'test2',
 			type: 'FLAT_INVESTMENT',
 			liked: [],
 		},
@@ -121,11 +131,11 @@ describe('RealitiesPage', () => {
 		expect(screen.getByText('⚠️ Failed to load realities')).toBeInTheDocument();
 	});
 
-	it('should filter realities by name', async () => {
+	it('should filter realities by title', async () => {
 		render(<RealitiesPage />);
 
-		const nameInput = screen.getByPlaceholderText('Filter by name...');
-		fireEvent.change(nameInput, { target: { value: 'Test Reality 1' } });
+		const titleInput = screen.getByPlaceholderText('Filter by title...');
+		fireEvent.change(titleInput, { target: { value: 'Test Reality 1' } });
 
 		await waitFor(() => {
 			expect(screen.getByText('Test Reality 1')).toBeInTheDocument();
@@ -218,8 +228,8 @@ describe('RealitiesPage', () => {
 	it('should show empty state when no realities match filters', async () => {
 		render(<RealitiesPage />);
 
-		const nameInput = screen.getByPlaceholderText('Filter by name...');
-		fireEvent.change(nameInput, { target: { value: 'Non-existent Reality' } });
+		const titleInput = screen.getByPlaceholderText('Filter by title...');
+		fireEvent.change(titleInput, { target: { value: 'Non-existent Reality' } });
 
 		await waitFor(() => {
 			expect(screen.getByText('No realities match your filters')).toBeInTheDocument();

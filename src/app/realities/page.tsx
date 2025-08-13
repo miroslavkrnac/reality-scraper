@@ -31,8 +31,8 @@ const RealitiesPage = () => {
 	// @NOTE: Filtered data
 	const filteredRealities = useMemo(() => {
 		return realities.filter(reality => {
-			// @NOTE: Name filter
-			const matchesName = reality.name.toLowerCase().includes(nameFilter.toLowerCase());
+			// @NOTE: Title filter (replaces name filter)
+			const matchesTitle = reality.title.toLowerCase().includes(nameFilter.toLowerCase());
 
 			// @NOTE: Liked filter
 			let matchesLiked = true;
@@ -45,7 +45,7 @@ const RealitiesPage = () => {
 			// @NOTE: Type filter
 			const matchesType = typeFilter === 'all' || reality.type === typeFilter;
 
-			return matchesName && matchesLiked && matchesType;
+			return matchesTitle && matchesLiked && matchesType;
 		});
 	}, [realities, nameFilter, likedFilter, typeFilter, isLiked]);
 
@@ -109,10 +109,22 @@ const RealitiesPage = () => {
 			width: 100,
 		},
 		{
-			title: 'Name',
-			dataIndex: 'name',
-			key: 'name',
-			sorter: (a, b) => a.name.localeCompare(b.name),
+			title: 'Title',
+			dataIndex: 'title',
+			key: 'title',
+			sorter: (a, b) => a.title.localeCompare(b.title),
+		},
+		{
+			title: 'Location',
+			dataIndex: 'location',
+			key: 'location',
+			sorter: (a, b) => a.location.localeCompare(b.location),
+		},
+		{
+			title: 'Price',
+			dataIndex: 'price',
+			key: 'price',
+			sorter: (a, b) => a.price.localeCompare(b.price),
 		},
 		{
 			title: 'Type',
@@ -187,7 +199,7 @@ const RealitiesPage = () => {
 				<div className={styles.filterSection}>
 					<Space wrap>
 						<Input
-							placeholder="Filter by name..."
+							placeholder="Filter by title..."
 							value={nameFilter}
 							onChange={e => setNameFilter(e.target.value)}
 							style={{ width: 200 }}
@@ -268,13 +280,28 @@ const RealitiesPage = () => {
 				{selectedReality && (
 					<div className={styles.modalContent}>
 						<div className={styles.modalSection}>
-							<Title level={4}>Name</Title>
-							<Text>{selectedReality.name}</Text>
+							<Title level={4}>Title</Title>
+							<Text>{selectedReality.title}</Text>
+						</div>
+
+						<div className={styles.modalSection}>
+							<Title level={4}>Location</Title>
+							<Text>{selectedReality.location}</Text>
+						</div>
+
+						<div className={styles.modalSection}>
+							<Title level={4}>Price</Title>
+							<Text>{selectedReality.price}</Text>
 						</div>
 
 						<div className={styles.modalSection}>
 							<Title level={4}>ID</Title>
 							<Text>{selectedReality.id}</Text>
+						</div>
+
+						<div className={styles.modalSection}>
+							<Title level={4}>Reality ID</Title>
+							<Text>{selectedReality.reality_id}</Text>
 						</div>
 
 						<div className={styles.modalSection}>

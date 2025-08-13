@@ -7,7 +7,7 @@ let browserInstance: Browser | null = null;
 const getBrowser = async () => {
 	if (!browserInstance) {
 		browserInstance = await puppeteer.launch({
-			headless: "shell",
+			headless: 'shell',
 			executablePath:
 				process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 			args: [
@@ -40,37 +40,33 @@ const getBrowser = async () => {
 	return browserInstance;
 };
 
-export const scrapePage = async (
-	url: string,
-	evaluate: (page: Page) => Promise<any>,
-	retries = 5,
-): Promise<any> => {
+export const scrapePage = async (url: string, evaluate: (page: Page) => Promise<any>, retries = 5): Promise<any> => {
 	const browser = await getBrowser();
 	const page = await browser.newPage();
 
 	try {
 		log('Scraping page', url);
-		
+
 		// @NOTE: Set anti-detection measures
 		await page.evaluateOnNewDocument(() => {
 			// @NOTE: Remove webdriver property
 			(navigator as any).webdriver = undefined;
-			
+
 			// @NOTE: Override plugins to look more human
 			Object.defineProperty(navigator, 'plugins', {
 				get: () => [1, 2, 3, 4, 5],
 			});
-			
+
 			// @NOTE: Override languages
 			Object.defineProperty(navigator, 'languages', {
 				get: () => ['cs-CZ', 'cs', 'en'],
 			});
-			
+
 			// @NOTE: Override permissions
 			const originalQuery = window.navigator.permissions.query;
 			window.navigator.permissions.query = (parameters: any) => {
 				if (parameters.name === 'notifications') {
-					return Promise.resolve({ 
+					return Promise.resolve({
 						state: Notification.permission,
 						name: 'notifications',
 						onchange: null,
@@ -85,12 +81,12 @@ export const scrapePage = async (
 				}
 				return originalQuery(parameters);
 			};
-			
+
 			// @NOTE: Override chrome runtime
 			(window as any).chrome = {
 				runtime: {},
 			};
-			
+
 			// @NOTE: Override permissions API
 			Object.defineProperty(navigator, 'permissions', {
 				get: () => ({
@@ -107,7 +103,9 @@ export const scrapePage = async (
 		});
 
 		// @NOTE: Set user agent
-		await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+		await page.setUserAgent(
+			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+		);
 
 		// @NOTE: Set longer timeouts for better reliability
 		page.setDefaultNavigationTimeout(30000);
