@@ -7,7 +7,7 @@ let browserInstance: Browser | null = null;
 const getBrowser = async () => {
 	if (!browserInstance) {
 		browserInstance = await puppeteer.launch({
-			headless: false,
+			headless: "shell",
 			executablePath:
 				process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 			args: [
@@ -42,9 +42,9 @@ const getBrowser = async () => {
 
 export const scrapePage = async (
 	url: string,
-	evaluate: (page: Page) => Promise<number>,
+	evaluate: (page: Page) => Promise<any>,
 	retries = 5,
-): Promise<number> => {
+): Promise<any> => {
 	const browser = await getBrowser();
 	const page = await browser.newPage();
 
