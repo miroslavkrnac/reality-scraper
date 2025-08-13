@@ -276,104 +276,128 @@ const RealitiesPage = () => {
 			</Card>
 
 			{/* @NOTE: Reality Details Modal */}
-			<Modal title="Reality Details" open={isModalVisible} onCancel={handleModalClose} footer={false} width={600}>
+			<Modal title="Reality Details" open={isModalVisible} onCancel={handleModalClose} footer={false} width={800}>
 				{selectedReality && (
 					<div className={styles.modalContent}>
+						{/* @NOTE: Image Section - Full Width */}
 						{selectedReality.img_src && (
 							<div className={styles.modalSection}>
-								<Title level={4}>Property Image</Title>
 								<div style={{ textAlign: 'center' }}>
 									<img
 										src={selectedReality.img_src}
 										alt={selectedReality.title}
 										style={{
 											maxWidth: '100%',
-											maxHeight: '300px',
-											borderRadius: '8px',
-											boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+											maxHeight: '350px',
+											borderRadius: '12px',
+											boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
 										}}
 									/>
 								</div>
 							</div>
 						)}
 
-						<div className={styles.modalSection}>
-							<Title level={4}>Title</Title>
-							<Text>{selectedReality.title}</Text>
-						</div>
-
-						<div className={styles.modalSection}>
-							<Title level={4}>Location</Title>
-							<Text>{selectedReality.location}</Text>
-						</div>
-
-						<div className={styles.modalSection}>
-							<Title level={4}>Price</Title>
-							<Text>{selectedReality.price}</Text>
-						</div>
-
-						<div className={styles.modalSection}>
-							<Title level={4}>ID</Title>
-							<Text>{selectedReality.id}</Text>
-						</div>
-
-						<div className={styles.modalSection}>
-							<Title level={4}>Reality ID</Title>
-							<Text>{selectedReality.reality_id}</Text>
-						</div>
-
-						<div className={styles.modalSection}>
-							<Title level={4}>Type</Title>
-							<Text>
-								{(() => {
-									const typeLabels = {
-										FLAT_PERSONAL: 'Flat Personal',
-										FLAT_INVESTMENT: 'Flat Investment',
-										LAND_PERSONAL: 'Land Personal',
-										LAND_INVESTMENT: 'Land Investment',
-									};
-									return typeLabels[selectedReality.type];
-								})()}
-							</Text>
-						</div>
-
-						<div className={styles.modalSection}>
-							<Title level={4}>Property Details</Title>
-							<div style={{ textAlign: 'center', padding: '20px' }}>
-								<Button
-									type="primary"
-									size="large"
-									icon={<EyeOutlined />}
-									onClick={() =>
-										window.open(
-											`https://www.sreality.cz${selectedReality.link}`,
-											'_blank',
-											'noopener,noreferrer',
-										)
-									}
-								>
-									View Property on Sreality.cz
-								</Button>
-								<div style={{ marginTop: '12px', fontSize: '14px', color: '#666' }}>
-									Opens in a new tab
+						{/* @NOTE: Main Content - Two Columns */}
+						<div style={{ display: 'flex', gap: '24px', marginTop: '24px' }}>
+							{/* @NOTE: Left Column - Property Details */}
+							<div style={{ flex: 1 }}>
+								<div className={styles.modalSection}>
+									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>Property Information</Title>
+									
+									<div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+											<Text strong style={{ color: '#666' }}>Title:</Text>
+											<Text style={{ textAlign: 'right', maxWidth: '60%' }}>{selectedReality.title}</Text>
+										</div>
+										
+										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+											<Text strong style={{ color: '#666' }}>Location:</Text>
+											<Text style={{ textAlign: 'right', maxWidth: '60%' }}>{selectedReality.location}</Text>
+										</div>
+										
+										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+											<Text strong style={{ color: '#666' }}>Price:</Text>
+											<Text strong style={{ textAlign: 'right', color: '#52c41a', fontSize: '16px' }}>{selectedReality.price}</Text>
+										</div>
+										
+										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+											<Text strong style={{ color: '#666' }}>Type:</Text>
+											<Text style={{ textAlign: 'right' }}>
+												{(() => {
+													const typeLabels = {
+														FLAT_PERSONAL: 'Flat Personal',
+														FLAT_INVESTMENT: 'Flat Investment',
+														LAND_PERSONAL: 'Land Personal',
+														LAND_INVESTMENT: 'Land Investment',
+													};
+													return typeLabels[selectedReality.type];
+												})()}
+											</Text>
+										</div>
+									</div>
 								</div>
 							</div>
-						</div>
 
-						<div className={styles.modalSection}>
-							<Title level={4}>Actions</Title>
-							<Button
-								type="primary"
-								icon={isLiked(selectedReality.id) ? <HeartFilled /> : <HeartOutlined />}
-								onClick={handleModalLikeToggle}
-								loading={likedLoading}
-								style={{
-									backgroundColor: isLiked(selectedReality.id) ? '#ff4d4f' : undefined,
-									borderColor: isLiked(selectedReality.id) ? '#ff4d4f' : undefined,
-								}}
-							>
-								{isLiked(selectedReality.id) ? 'Unlike' : 'Like'}
-							</Button>
+							{/* @NOTE: Right Column - Technical Details & Actions */}
+							<div style={{ flex: 1 }}>
+								<div className={styles.modalSection}>
+									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>Technical Details</Title>
+									
+									<div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+											<Text strong style={{ color: '#666' }}>ID:</Text>
+											<Text style={{ textAlign: 'right' }}>{selectedReality.id}</Text>
+										</div>
+										
+										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+											<Text strong style={{ color: '#666' }}>Reality ID:</Text>
+											<Text style={{ textAlign: 'right' }}>{selectedReality.reality_id}</Text>
+										</div>
+									</div>
+								</div>
+
+								{/* @NOTE: Actions Section */}
+								<div className={styles.modalSection}>
+									<Title level={4} style={{ marginBottom: '16px', color: '#1890ff' }}>Actions</Title>
+									
+									<div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+										<Button
+											type="primary"
+											size="large"
+											icon={<EyeOutlined />}
+											onClick={() =>
+												window.open(
+													`https://www.sreality.cz${selectedReality.link}`,
+													'_blank',
+													'noopener,noreferrer',
+												)
+											}
+											style={{ width: '100%', height: '48px' }}
+										>
+											View Property on Sreality.cz
+										</Button>
+										
+										<Button
+											type={isLiked(selectedReality.id) ? 'primary' : 'default'}
+											icon={isLiked(selectedReality.id) ? <HeartFilled /> : <HeartOutlined />}
+											onClick={handleModalLikeToggle}
+											loading={likedLoading}
+											style={{
+												width: '100%',
+												height: '48px',
+												backgroundColor: isLiked(selectedReality.id) ? '#ff4d4f' : undefined,
+												borderColor: isLiked(selectedReality.id) ? '#ff4d4f' : undefined,
+											}}
+										>
+											{isLiked(selectedReality.id) ? 'Unlike' : 'Like'}
+										</Button>
+										
+										<div style={{ fontSize: '12px', color: '#999', textAlign: 'center', marginTop: '8px' }}>
+											Opens in a new tab
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				)}
