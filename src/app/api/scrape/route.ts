@@ -18,7 +18,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 		log('Starting scraping of', url);
 
-		const estates = await scrapePage(url, async page => {
+		const allEstates = await scrapePage(url, async page => {
 			// @NOTE: Check if we can find the estates list
 			try {
 				await page.waitForSelector('[data-e2e="estates-list"]', { timeout: 3000 });
@@ -33,19 +33,64 @@ export async function POST(request: Request): Promise<NextResponse> {
 				log('Estates list found successfully');
 			}
 
-			return page.evaluate(async () => {
-				const estateElements = document.querySelectorAll(
-					'[data-e2e="estates-list"] > li[id^="estate-list-item-"]',
+			// @NOTE: Recursive function to scrape all pages
+			const scrapeAllPages = async (): Promise<
+				Array<{
+					id: string | undefined;
+					link: string | undefined;
+					img: string | undefined;
+					title: string | undefined;
+					location: string | undefined;
+					price: string | undefined;
+				}>
+			> => {
+				// @NOTE: Extract data from current page
+				const pageEstates = await page.evaluate(async () => {
+					const estateElements = document.querySelectorAll(
+						'[data-e2e="estates-list"] > li:not([id^="estate-list-native-"])',
+					);
+					return Array.from(estateElements).map(estate => ({
+						id: estate.getAttribute('id')?.replace('estate-list-item-', '').replace(/region-tip-item-\d+-/gmi, ""),
+						link: estate.querySelector('a')?.getAttribute('href') || undefined,
+						img: estate.querySelector('img:nth-of-type(2)')?.getAttribute('src')?.replace('//', 'https://'),
+						title: estate.querySelector('a p:first-of-type')?.textContent?.trim(),
+						location: estate.querySelector('a p:nth-of-type(2)')?.textContent?.trim(),
+						price: estate.querySelector('a p:nth-of-type(3)')?.textContent?.trim(),
+					}));
+				});
+
+				log(`Extracted ${pageEstates.length} estates from current page`);
+
+				// @NOTE: Check if there's a "show-more-btn" and click it
+				const showMoreBtn = await page.$('[data-e2e="show-more-btn"]');
+				if (!showMoreBtn) {
+					log('No more pages to load');
+					return pageEstates;
+				}
+
+				log('Found show-more-btn, clicking to load next page');
+				await showMoreBtn.click();
+
+				// @NOTE: Wait for new content to load
+				await new Promise(resolve => setTimeout(resolve, 2000));
+
+				// @NOTE: Wait for the estates list to update
+				await page.waitForFunction(
+					() => {
+						const estateElements = document.querySelectorAll(
+							'[data-e2e="estates-list"] > li[id^="estate-list-item-"]',
+						);
+						return estateElements.length > 0;
+					},
+					{ timeout: 10000 },
 				);
-				return Array.from(estateElements).map(estate => ({
-					id: estate.getAttribute('id')?.replace('estate-list-item-', ''),
-					link: estate.querySelector('a')?.getAttribute('href'),
-					img: estate.querySelector('img:nth-of-type(2)')?.getAttribute('src')?.replace('//', 'https://'),
-					title: estate.querySelector('a p:first-of-type')?.textContent?.trim(),
-					location: estate.querySelector('a p:nth-of-type(2)')?.textContent?.trim(),
-					price: estate.querySelector('a p:nth-of-type(3)')?.textContent?.trim(),
-				}));
-			});
+
+				// @NOTE: Recursively scrape the next page and combine results
+				const nextPageEstates = await scrapeAllPages();
+				return [...pageEstates, ...nextPageEstates];
+			};
+
+			return scrapeAllPages();
 		});
 
 		log('Scraping completed successfully');
@@ -54,7 +99,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 			success: true,
 			data: {
 				url,
-				estates,
+				estates: allEstates,
 				timestamp: new Date().toISOString(),
 			},
 		});
