@@ -152,6 +152,6 @@ describe('useLikedRealities', () => {
 			await new Promise(resolve => setTimeout(resolve, 0));
 		});
 
-		expect(mockGetLikedRealities).toHaveBeenCalledWith(21);
+		expect(mockGetLikedRealities).toHaveBeenCalledWith(1);
 	});
 });

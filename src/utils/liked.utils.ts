@@ -1,5 +1,5 @@
 // @NOTE: Client-side function to like a reality
-export const likeReality = async (realityId: number, userId = 21): Promise<boolean> => {
+export const likeReality = async (realityId: number, userId = 1): Promise<boolean> => {
 	try {
 		const response = await fetch('/api/liked', {
 			method: 'POST',
@@ -24,7 +24,7 @@ export const likeReality = async (realityId: number, userId = 21): Promise<boole
 };
 
 // @NOTE: Client-side function to unlike a reality
-export const unlikeReality = async (realityId: number, userId = 21): Promise<boolean> => {
+export const unlikeReality = async (realityId: number, userId = 1): Promise<boolean> => {
 	try {
 		const response = await fetch('/api/liked', {
 			method: 'DELETE',
@@ -45,7 +45,7 @@ export const unlikeReality = async (realityId: number, userId = 21): Promise<boo
 };
 
 // @NOTE: Client-side function to get liked realities
-export const getLikedRealities = async (userId = 21): Promise<number[]> => {
+export const getLikedRealities = async (userId = 1): Promise<number[]> => {
 	try {
 		const response = await fetch(`/api/liked?userId=${userId}`, {
 			method: 'GET',

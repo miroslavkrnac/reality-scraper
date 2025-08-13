@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { log } from '@/utils/logger';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -31,8 +32,12 @@ export const POST = async (request: NextRequest) => {
 		});
 
 		return NextResponse.json({ success: true, liked });
-	} catch (_error) {
-		return NextResponse.json({ error: 'Failed to like reality' }, { status: 500 });
+	} catch (error) {
+		log('Error in POST /api/liked:', error);
+		return NextResponse.json(
+			{ error: 'Failed to like reality', details: error instanceof Error ? error.message : 'Unknown error' },
+			{ status: 500 },
+		);
 	}
 };
 
@@ -53,8 +58,12 @@ export const DELETE = async (request: NextRequest) => {
 		});
 
 		return NextResponse.json({ success: true, deleted: deletedLike.count > 0 });
-	} catch (_error) {
-		return NextResponse.json({ error: 'Failed to unlike reality' }, { status: 500 });
+	} catch (error) {
+		log('Error in DELETE /api/liked:', error);
+		return NextResponse.json(
+			{ error: 'Failed to unlike reality', details: error instanceof Error ? error.message : 'Unknown error' },
+			{ status: 500 },
+		);
 	}
 };
 
@@ -74,7 +83,14 @@ export const GET = async (request: NextRequest) => {
 		});
 
 		return NextResponse.json(likedRealities);
-	} catch (_error) {
-		return NextResponse.json({ error: 'Failed to fetch liked realities' }, { status: 500 });
+	} catch (error) {
+		log('Error in GET /api/liked:', error);
+		return NextResponse.json(
+			{
+				error: 'Failed to fetch liked realities',
+				details: error instanceof Error ? error.message : 'Unknown error',
+			},
+			{ status: 500 },
+		);
 	}
 };

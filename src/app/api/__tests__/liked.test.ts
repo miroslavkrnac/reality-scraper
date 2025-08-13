@@ -123,7 +123,7 @@ describe('/api/liked', () => {
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
-			expect(data).toEqual({ error: 'Failed to like reality' });
+			expect(data).toEqual({ error: 'Failed to like reality', details: 'Database error' });
 		});
 	});
 
@@ -175,7 +175,7 @@ describe('/api/liked', () => {
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
-			expect(data).toEqual({ error: 'Failed to unlike reality' });
+			expect(data).toEqual({ error: 'Failed to unlike reality', details: 'Database error' });
 		});
 	});
 
@@ -233,7 +233,7 @@ describe('/api/liked', () => {
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
-			expect(data).toEqual({ error: 'Failed to fetch liked realities' });
+			expect(data).toEqual({ error: 'Failed to fetch liked realities', details: 'Database error' });
 		});
 	});
 });

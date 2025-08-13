@@ -13,19 +13,19 @@ describe('liked.utils', () => {
 		it('should like a reality successfully', async () => {
 			const mockResponse = {
 				ok: true,
-				json: vi.fn().mockResolvedValue({ success: true, liked: { id: 1, realityId: 1, userId: 21 } }),
+				json: vi.fn().mockResolvedValue({ success: true, liked: { id: 1, realityId: 1, userId: 1 } }),
 			};
 
 			(global.fetch as any).mockResolvedValue(mockResponse);
 
-			const result = await likeReality(1, 21);
+			const result = await likeReality(1, 1);
 
 			expect(global.fetch).toHaveBeenCalledWith('/api/liked', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ realityId: 1, userId: 21 }),
+				body: JSON.stringify({ realityId: 1, userId: 1 }),
 			});
 			expect(result).toBe(true);
 		});
@@ -80,7 +80,7 @@ describe('liked.utils', () => {
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ realityId: 1, userId: 21 }),
+				body: JSON.stringify({ realityId: 1, userId: 1 }),
 			});
 		});
 	});
@@ -94,14 +94,14 @@ describe('liked.utils', () => {
 
 			(global.fetch as any).mockResolvedValue(mockResponse);
 
-			const result = await unlikeReality(1, 21);
+			const result = await unlikeReality(1, 1);
 
 			expect(global.fetch).toHaveBeenCalledWith('/api/liked', {
 				method: 'DELETE',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ realityId: 1, userId: 21 }),
+				body: JSON.stringify({ realityId: 1, userId: 1 }),
 			});
 			expect(result).toBe(true);
 		});
@@ -114,7 +114,7 @@ describe('liked.utils', () => {
 
 			(global.fetch as any).mockResolvedValue(mockResponse);
 
-			const result = await unlikeReality(1, 21);
+			const result = await unlikeReality(1, 1);
 
 			expect(result).toBe(false);
 		});
@@ -122,7 +122,7 @@ describe('liked.utils', () => {
 		it('should handle network errors', async () => {
 			(global.fetch as any).mockRejectedValue(new Error('Network error'));
 
-			const result = await unlikeReality(1, 21);
+			const result = await unlikeReality(1, 1);
 
 			expect(result).toBe(false);
 		});
@@ -142,7 +142,7 @@ describe('liked.utils', () => {
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ realityId: 1, userId: 21 }),
+				body: JSON.stringify({ realityId: 1, userId: 1 }),
 			});
 		});
 	});
@@ -158,9 +158,9 @@ describe('liked.utils', () => {
 
 			(global.fetch as any).mockResolvedValue(mockResponse);
 
-			const result = await getLikedRealities(21);
+			const result = await getLikedRealities(1);
 
-			expect(global.fetch).toHaveBeenCalledWith('/api/liked?userId=21', {
+			expect(global.fetch).toHaveBeenCalledWith('/api/liked?userId=1', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ describe('liked.utils', () => {
 
 			(global.fetch as any).mockResolvedValue(mockResponse);
 
-			const result = await getLikedRealities(21);
+			const result = await getLikedRealities(1);
 
 			expect(result).toEqual([]);
 		});
@@ -185,7 +185,7 @@ describe('liked.utils', () => {
 		it('should handle network errors', async () => {
 			(global.fetch as any).mockRejectedValue(new Error('Network error'));
 
-			const result = await getLikedRealities(21);
+			const result = await getLikedRealities(1);
 
 			expect(result).toEqual([]);
 		});
@@ -200,7 +200,7 @@ describe('liked.utils', () => {
 
 			await getLikedRealities();
 
-			expect(global.fetch).toHaveBeenCalledWith('/api/liked?userId=21', {
+			expect(global.fetch).toHaveBeenCalledWith('/api/liked?userId=1', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
