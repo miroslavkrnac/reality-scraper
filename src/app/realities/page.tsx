@@ -276,9 +276,27 @@ const RealitiesPage = () => {
 			</Card>
 
 			{/* @NOTE: Reality Details Modal */}
-			<Modal title="Reality Details" open={isModalVisible} onCancel={handleModalClose} footer={false} width={500}>
+			<Modal title="Reality Details" open={isModalVisible} onCancel={handleModalClose} footer={false} width={600}>
 				{selectedReality && (
 					<div className={styles.modalContent}>
+						{selectedReality.img_src && (
+							<div className={styles.modalSection}>
+								<Title level={4}>Property Image</Title>
+								<div style={{ textAlign: 'center' }}>
+									<img
+										src={selectedReality.img_src}
+										alt={selectedReality.title}
+										style={{
+											maxWidth: '100%',
+											maxHeight: '300px',
+											borderRadius: '8px',
+											boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+										}}
+									/>
+								</div>
+							</div>
+						)}
+
 						<div className={styles.modalSection}>
 							<Title level={4}>Title</Title>
 							<Text>{selectedReality.title}</Text>
@@ -317,6 +335,29 @@ const RealitiesPage = () => {
 									return typeLabels[selectedReality.type];
 								})()}
 							</Text>
+						</div>
+
+						<div className={styles.modalSection}>
+							<Title level={4}>Property Details</Title>
+							<div style={{ textAlign: 'center', padding: '20px' }}>
+								<Button
+									type="primary"
+									size="large"
+									icon={<EyeOutlined />}
+									onClick={() =>
+										window.open(
+											`https://www.sreality.cz${selectedReality.link}`,
+											'_blank',
+											'noopener,noreferrer',
+										)
+									}
+								>
+									View Property on Sreality.cz
+								</Button>
+								<div style={{ marginTop: '12px', fontSize: '14px', color: '#666' }}>
+									Opens in a new tab
+								</div>
+							</div>
 						</div>
 
 						<div className={styles.modalSection}>
