@@ -1,6 +1,6 @@
 import type { RealityWithLikedUsers } from '@/types/reality.types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fetchRealities, getRealities } from '../reality.utils';
+import { deleteReality, fetchRealities, getRealities } from '../reality.utils';
 
 // @NOTE: Mock Prisma client
 vi.mock('@/lib/db', () => {
@@ -147,6 +147,49 @@ describe('reality.utils', () => {
 			const result = await fetchRealities();
 
 			expect(result).toEqual('invalid data');
+		});
+	});
+
+	describe('deleteReality', () => {
+		it('should delete a reality successfully', async () => {
+			const mockResponse = {
+				ok: true,
+				json: vi.fn().mockResolvedValue({ success: true }),
+			};
+
+			vi.mocked(global.fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+			const result = await deleteReality(1);
+
+			expect(global.fetch).toHaveBeenCalledWith('/api/realities', {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ realityId: 1 }),
+			});
+			expect(result).toBe(true);
+		});
+
+		it('should handle API errors', async () => {
+			const mockResponse = {
+				ok: false,
+				status: 500,
+			};
+
+			vi.mocked(global.fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+			const result = await deleteReality(1);
+
+			expect(result).toBe(false);
+		});
+
+		it('should handle network errors', async () => {
+			vi.mocked(global.fetch).mockRejectedValue(new Error('Network error'));
+
+			const result = await deleteReality(1);
+
+			expect(result).toBe(false);
 		});
 	});
 });

@@ -45,3 +45,25 @@ export const fetchRealities = async (): Promise<RealityWithLikedUsers[]> => {
 		return [];
 	}
 };
+
+// @NOTE: Client-side function to delete a reality
+export const deleteReality = async (realityId: number): Promise<boolean> => {
+	try {
+		const response = await fetch('/api/realities', {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ realityId }),
+		});
+
+		if (!response.ok) {
+			throw new Error(`Failed to delete reality: ${response.status}`);
+		}
+
+		const data = await response.json();
+		return data.success === true;
+	} catch (_error) {
+		return false;
+	}
+};

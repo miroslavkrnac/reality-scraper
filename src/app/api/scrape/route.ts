@@ -112,9 +112,21 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 		// @NOTE: Save scraped data to database
 		const savedEstates = [];
+		const skippedEstates = [];
 		for (const estate of allEstates) {
 			if (estate.id && estate.link && estate.title && estate.location && estate.price) {
 				try {
+					// @NOTE: Check if this estate is in the deleted table
+					const deletedRecord = await db.deleted.findUnique({
+						where: { reality_id: estate.id },
+					});
+
+					if (deletedRecord) {
+						log(`Skipping estate ${estate.id} - it was previously deleted`);
+						skippedEstates.push(estate.id);
+						continue;
+					}
+
 					const savedEstate = await db.reality.upsert({
 						where: { reality_id: estate.id },
 						update: {
@@ -143,6 +155,9 @@ export async function POST(request: Request): Promise<NextResponse> {
 		}
 
 		log(`Saved ${savedEstates.length} estates to database`);
+		if (skippedEstates.length > 0) {
+			log(`Skipped ${skippedEstates.length} previously deleted estates`);
+		}
 
 		return NextResponse.json({
 			success: true,
@@ -151,6 +166,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 				type,
 				estates: allEstates,
 				savedCount: savedEstates.length,
+				skippedCount: skippedEstates.length,
+				skippedEstates,
 				timestamp: new Date().toISOString(),
 			},
 		});

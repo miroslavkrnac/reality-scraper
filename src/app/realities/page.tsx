@@ -3,7 +3,8 @@
 import { useLikedRealities } from '@/hooks/useLikedRealities';
 import { useRealities } from '@/hooks/useRealities';
 import type { RealityType, RealityWithLikedUsers } from '@/types/reality.types';
-import { EyeOutlined, FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
+import { deleteReality } from '@/utils/reality.utils';
+import { DeleteOutlined, EyeOutlined, FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Input, Modal, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useMemo, useState } from 'react';
@@ -27,6 +28,11 @@ const RealitiesPage = () => {
 	// @NOTE: Modal state
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [selectedReality, setSelectedReality] = useState<RealityWithLikedUsers | null>(null);
+
+	// @NOTE: Delete confirmation modal state
+	const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+	const [realityToDelete, setRealityToDelete] = useState<RealityWithLikedUsers | null>(null);
+	const [deleteLoading, setDeleteLoading] = useState(false);
 
 	// @NOTE: Filtered data
 	const filteredRealities = useMemo(() => {
@@ -90,6 +96,39 @@ const RealitiesPage = () => {
 		} else {
 			message.error('Failed to update like status');
 		}
+	};
+
+	// @NOTE: Handle delete reality
+	const handleDeleteReality = (reality: RealityWithLikedUsers) => {
+		setRealityToDelete(reality);
+		setIsDeleteModalVisible(true);
+	};
+
+	// @NOTE: Handle delete confirmation
+	const handleDeleteConfirm = async () => {
+		if (!realityToDelete) {
+			return;
+		}
+
+		setDeleteLoading(true);
+		const success = await deleteReality(realityToDelete.id);
+		setDeleteLoading(false);
+
+		if (success) {
+			message.success('Reality deleted successfully!');
+			setIsDeleteModalVisible(false);
+			setRealityToDelete(null);
+			// @NOTE: Refresh the realities list
+			window.location.reload();
+		} else {
+			message.error('Failed to delete reality');
+		}
+	};
+
+	// @NOTE: Handle delete modal close
+	const handleDeleteModalClose = () => {
+		setIsDeleteModalVisible(false);
+		setRealityToDelete(null);
 	};
 
 	// @NOTE: Clear all filters
@@ -163,7 +202,7 @@ const RealitiesPage = () => {
 		{
 			title: 'Actions',
 			key: 'actions',
-			width: 150,
+			width: 200,
 			render: (_, record) => (
 				<Space>
 					<Button
@@ -180,6 +219,13 @@ const RealitiesPage = () => {
 						loading={likedLoading}
 						className={styles.actionButton}
 						title={isLiked(record.id) ? 'Unlike' : 'Like'}
+					/>
+					<Button
+						type="text"
+						icon={<DeleteOutlined style={{ color: '#ff4d4f' }} />}
+						onClick={() => handleDeleteReality(record)}
+						className={styles.actionButton}
+						title="Delete reality"
 					/>
 				</Space>
 			),
@@ -489,6 +535,24 @@ const RealitiesPage = () => {
 						</div>
 					</div>
 				)}
+			</Modal>
+
+			{/* @NOTE: Delete Confirmation Modal */}
+			<Modal
+				title="Delete Reality"
+				open={isDeleteModalVisible}
+				onCancel={handleDeleteModalClose}
+				footer={[
+					<Button key="no" onClick={handleDeleteModalClose}>
+						No
+					</Button>,
+					<Button key="yes" type="primary" danger loading={deleteLoading} onClick={handleDeleteConfirm}>
+						Yes
+					</Button>,
+				]}
+				width={400}
+			>
+				<Text>Do you really want to delete reality "{realityToDelete?.title}"?</Text>
 			</Modal>
 		</div>
 	);

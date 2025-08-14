@@ -49,3 +49,11 @@ model Liked {
 
   @@map("liked")
 }
+
+model Deleted {
+  id         Int    @id @default(autoincrement())
+  reality_id String @unique
+  deleted_at DateTime @default(now())
+
+  @@map("deleted")
+}
