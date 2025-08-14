@@ -33,10 +33,11 @@ model Reality {
   title      String
   location   String
   price      String
-  reality_id String      @unique
+  reality_id String
   type       RealityType @default(FLAT_PERSONAL)
   liked      Liked[]
 
+  @@unique([reality_id, type])
   @@map("realities")
 }
 
@@ -51,9 +52,11 @@ model Liked {
 }
 
 model Deleted {
-  id         Int    @id @default(autoincrement())
-  reality_id String @unique
-  deleted_at DateTime @default(now())
+  id         Int         @id @default(autoincrement())
+  reality_id String
+  type       RealityType @default(FLAT_PERSONAL)
+  deleted_at DateTime    @default(now())
 
+  @@unique([reality_id, type])
   @@map("deleted")
 }

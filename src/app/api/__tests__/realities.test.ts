@@ -110,6 +110,7 @@ describe('/api/realities', () => {
 			const { db } = await import('@/lib/db');
 			const mockReality = {
 				reality_id: 'test1',
+				type: 'FLAT_PERSONAL' as const,
 			};
 			const mockDeletedReality = {
 				id: 1,
@@ -124,6 +125,7 @@ describe('/api/realities', () => {
 			const mockDeletedRecord = {
 				id: 1,
 				reality_id: 'test1',
+				type: 'FLAT_PERSONAL' as const,
 				deleted_at: new Date(),
 			};
 
@@ -140,7 +142,7 @@ describe('/api/realities', () => {
 
 			expect(db.reality.findUnique).toHaveBeenCalledWith({
 				where: { id: 1 },
-				select: { reality_id: true },
+				select: { reality_id: true, type: true },
 			});
 			expect(db.reality.delete).toHaveBeenCalledWith({
 				where: { id: 1 },
@@ -148,6 +150,7 @@ describe('/api/realities', () => {
 			expect(db.deleted.create).toHaveBeenCalledWith({
 				data: {
 					reality_id: 'test1',
+					type: 'FLAT_PERSONAL',
 				},
 			});
 			expect(response.status).toBe(200);

@@ -19,10 +19,10 @@ export const DELETE = async (request: Request) => {
 			return NextResponse.json({ error: 'Reality ID is required' }, { status: 400 });
 		}
 
-		// @NOTE: Get the reality before deleting to get its reality_id
+		// @NOTE: Get the reality before deleting to get its reality_id and type
 		const reality = await db.reality.findUnique({
 			where: { id: realityId },
-			select: { reality_id: true },
+			select: { reality_id: true, type: true },
 		});
 
 		if (!reality) {
@@ -38,6 +38,7 @@ export const DELETE = async (request: Request) => {
 		await db.deleted.create({
 			data: {
 				reality_id: reality.reality_id,
+				type: reality.type,
 			},
 		});
 

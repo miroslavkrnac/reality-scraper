@@ -118,24 +118,33 @@ export async function POST(request: Request): Promise<NextResponse> {
 				try {
 					// @NOTE: Check if this estate is in the deleted table
 					const deletedRecord = await db.deleted.findUnique({
-						where: { reality_id: estate.id },
+						where: {
+							reality_id_type: {
+								reality_id: estate.id,
+								type: type as RealityType,
+							},
+						},
 					});
 
 					if (deletedRecord) {
-						log(`Skipping estate ${estate.id} - it was previously deleted`);
+						log(`Skipping estate ${estate.id} (${type}) - it was previously deleted`);
 						skippedEstates.push(estate.id);
 						continue;
 					}
 
 					const savedEstate = await db.reality.upsert({
-						where: { reality_id: estate.id },
+						where: {
+							reality_id_type: {
+								reality_id: estate.id,
+								type: type as RealityType,
+							},
+						},
 						update: {
 							link: estate.link,
 							img_src: estate.img,
 							title: estate.title,
 							location: estate.location,
 							price: estate.price,
-							type: type as RealityType,
 						},
 						create: {
 							link: estate.link,
