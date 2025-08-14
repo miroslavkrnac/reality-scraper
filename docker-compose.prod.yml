@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  reality-scraper:
+    image: registry.gitlab.com/krnacmir/reality-scraper
+    container_name: reality-scraper
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    # @NOTE: Increase shared memory for Puppeteer
+    shm_size: '2gb'
+    # @NOTE: Add security options for running as non-root user
+    security_opt:
+      - no-new-privileges:true
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: reality-scraper-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-reality_scraper}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
