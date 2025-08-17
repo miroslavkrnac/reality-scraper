@@ -176,6 +176,7 @@ const RealitiesPage = () => {
 					FLAT_INVESTMENT: 'Flat Investment',
 					LAND_PERSONAL: 'Land Personal',
 					LAND_INVESTMENT: 'Land Investment',
+					OTHER: 'Other',
 				};
 				return typeLabels[type];
 			},
@@ -431,6 +432,7 @@ const RealitiesPage = () => {
 														FLAT_INVESTMENT: 'Flat Investment',
 														LAND_PERSONAL: 'Land Personal',
 														LAND_INVESTMENT: 'Land Investment',
+														OTHER: 'Other',
 													};
 													return typeLabels[selectedReality.type];
 												})()}
