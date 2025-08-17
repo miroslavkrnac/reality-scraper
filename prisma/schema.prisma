@@ -24,6 +24,7 @@ enum RealityType {
   FLAT_INVESTMENT
   LAND_PERSONAL
   LAND_INVESTMENT
+  OTHER
 }
 
 model Reality {

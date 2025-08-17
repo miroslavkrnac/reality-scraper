@@ -271,6 +271,7 @@ const RealitiesPage = () => {
 								{ value: 'FLAT_INVESTMENT', label: 'Flat Investment' },
 								{ value: 'LAND_PERSONAL', label: 'Land Personal' },
 								{ value: 'LAND_INVESTMENT', label: 'Land Investment' },
+								{ value: 'OTHER', label: 'Other' },
 							]}
 						/>
 						<Button

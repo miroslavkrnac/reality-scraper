@@ -1,4 +1,4 @@
-export type RealityType = 'FLAT_PERSONAL' | 'FLAT_INVESTMENT' | 'LAND_PERSONAL' | 'LAND_INVESTMENT';
+export type RealityType = 'FLAT_PERSONAL' | 'FLAT_INVESTMENT' | 'LAND_PERSONAL' | 'LAND_INVESTMENT' | 'OTHER';
 
 export interface Reality {
 	id: number;

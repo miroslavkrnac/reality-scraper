@@ -79,6 +79,17 @@ describe('RealitiesPage', () => {
 			type: 'FLAT_INVESTMENT',
 			liked: [],
 		},
+		{
+			id: 3,
+			link: '/detail/test3',
+			img_src: 'https://example.com/img3.jpg',
+			title: 'Test Reality 3',
+			location: 'Test Location 3',
+			price: '3,000,000 Kč',
+			reality_id: 'test3',
+			type: 'OTHER',
+			liked: [],
+		},
 	];
 
 	beforeEach(() => {
@@ -188,6 +199,28 @@ describe('RealitiesPage', () => {
 		});
 	});
 
+	it('should filter realities by OTHER type', async () => {
+		render(<RealitiesPage />);
+
+		const typeSelects = screen.getAllByRole('combobox');
+		const typeSelect = typeSelects[1]; // @NOTE: Second combobox is the type filter
+		fireEvent.mouseDown(typeSelect);
+
+		const typeOptions = screen.getAllByText('Other');
+		const typeOption = typeOptions.find(
+			option => option.closest('.ant-select-item-option-content') || option.closest('.ant-select-dropdown'),
+		);
+		if (typeOption) {
+			fireEvent.click(typeOption);
+		}
+
+		await waitFor(() => {
+			expect(screen.getByText('Test Reality 3')).toBeInTheDocument();
+			expect(screen.queryByText('Test Reality 1')).not.toBeInTheDocument();
+			expect(screen.queryByText('Test Reality 2')).not.toBeInTheDocument();
+		});
+	});
+
 	it('should handle like/unlike actions', () => {
 		const mockToggleLike = vi.fn();
 		mockUseLikedRealities.mockReturnValue({
@@ -222,6 +255,7 @@ describe('RealitiesPage', () => {
 		await waitFor(() => {
 			expect(screen.getByText('Test Reality 1')).toBeInTheDocument();
 			expect(screen.getByText('Test Reality 2')).toBeInTheDocument();
+			expect(screen.getByText('Test Reality 3')).toBeInTheDocument();
 		});
 	});
 
