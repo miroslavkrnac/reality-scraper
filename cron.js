@@ -34,7 +34,7 @@ const scrapeAllUrls = async () => {
 		try {
 			console.log(`📡 Scraping ${type} from: ${url}`);
 			
-			const response = await fetch('http://localhost:3000/api/scrape', {
+			const response = await fetch('http://localhost:3005/api/scrape', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ const scrapeAllUrls = async () => {
 			const result = await response.json();
 			console.log(`✅ Successfully scraped ${type}:`, result.data?.savedCount || 0, 'items saved');
 		} catch (error) {
-			console.error(`❌ Error scraping ${type}:`, error.message);
+			console.error(`❌ Error scraping ${type}:`, error);
 		}
 	}
 	
