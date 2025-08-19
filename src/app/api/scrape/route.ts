@@ -33,17 +33,6 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 		log('Starting scraping of', url);
 
-		// @NOTE: Get the last record for this type to check for existing realities (including deleted ones)
-		const lastRecord = await db.reality.findFirst({
-			where: {
-				type: type as RealityType,
-			},
-			orderBy: { id: 'desc' },
-			select: { reality_id: true },
-		});
-
-		log(`Last record for type ${type}:`, lastRecord?.reality_id || 'none');
-
 		const allEstates = await scrapePage(url, async page => {
 			// @NOTE: Check if we can find the estates list
 			try {
@@ -90,17 +79,37 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 				log(`Extracted ${pageEstates.length} estates from current page`);
 
-				// @NOTE: Check if any of the scraped estates already exist in database
-				const existingRealityFound = pageEstates.some(
-					estate => estate.id && estate.id === lastRecord?.reality_id,
-				);
+				// @NOTE: Get all valid IDs from the current page
+				const validIds = pageEstates.filter(estate => estate.id).map(estate => estate.id!);
 
-				if (existingRealityFound) {
-					log(`Found existing reality ${lastRecord?.reality_id} on current page - stopping scraping`);
-					// @NOTE: Return estates up to the existing one (exclusive)
-					const estatesUpToExisting = pageEstates.filter(
-						estate => estate.id && estate.id !== lastRecord?.reality_id,
+				if (validIds.length === 0) {
+					log('No valid IDs found on current page');
+					return pageEstates;
+				}
+
+				// @NOTE: Batch check if any of these estates already exist in database
+				const existingRealities = await db.reality.findMany({
+					where: {
+						reality_id: { in: validIds },
+						type: type as RealityType,
+					},
+					select: { reality_id: true },
+				});
+
+				if (existingRealities.length > 0) {
+					const existingIds = existingRealities.map(r => r.reality_id);
+					log(
+						`Found ${existingRealities.length} existing realities: ${existingIds.join(', ')} - stopping scraping`,
 					);
+
+					// @NOTE: Return estates up to the first existing one
+					const estatesUpToExisting = [];
+					for (const estate of pageEstates) {
+						if (estate.id && existingIds.includes(estate.id)) {
+							break; // @NOTE: Stop at first existing reality
+						}
+						estatesUpToExisting.push(estate);
+					}
 					return estatesUpToExisting;
 				}
 
