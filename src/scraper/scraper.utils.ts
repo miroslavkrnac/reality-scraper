@@ -146,9 +146,4 @@ export const scrapePage = async (url: string, evaluate: (page: Page) => Promise<
 	}
 };
 
-export const closeBrowser = async () => {
-	if (browserInstance) {
-		await browserInstance.close();
-		browserInstance = null;
-	}
-};
+

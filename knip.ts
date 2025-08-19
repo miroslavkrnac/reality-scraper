@@ -1,6 +1,6 @@
 const config = {
-	entry: ['src/app/**/page.tsx', 'src/app/**/route.ts'],
-	project: ['src/**/*.{ts,tsx}'],
+	entry: ['src/app/**/page.tsx', 'src/app/**/route.ts', 'scripts/genAntdCss.mjs'],
+	project: ['src/**/*.{ts,tsx}', 'scripts/**/*.mjs'],
 	ignore: [
 		'**/*.test.{ts,tsx}',
 		'**/*.spec.{ts,tsx}',

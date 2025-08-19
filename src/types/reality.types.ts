@@ -13,8 +13,4 @@ export interface Reality {
 	deleted: boolean;
 }
 
-export interface User {
-	id: number;
-	name: string;
-	email: string;
-}
+
