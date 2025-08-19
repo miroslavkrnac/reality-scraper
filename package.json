@@ -22,10 +22,12 @@
 		"scrape": "tsx test/scraper.ts",
 		"docker:build": "docker build --platform linux/amd64 -t registry.gitlab.com/krnacmir/reality-scraper .",
 		"docker:push": "docker push registry.gitlab.com/krnacmir/reality-scraper",
-		"release": "yarn docker:build && yarn docker:push"
+		"release": "yarn docker:build && yarn docker:push",
+		"antcss": "node ./scripts/genAntdCss.mjs"
 	},
 	"dependencies": {
 		"@ant-design/cssinjs": "^1.24.0",
+		"@ant-design/static-style-extract": "^1.0.3",
 		"@prisma/client": "^5.8.1",
 		"antd": "^5.13.2",
 		"next": "15",

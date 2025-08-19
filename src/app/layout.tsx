@@ -1,7 +1,7 @@
-import { StyleRegistry } from '@/lib/StyleRegistry';
 import type { Metadata } from 'next';
 import { ClientProviders } from './providers';
 import './globals.scss';
+import './antd.min.css';
 
 export const metadata: Metadata = {
 	title: 'Reality Scraper',
@@ -18,11 +18,9 @@ interface RootLayoutProps {
 const RootLayout = ({ children }: RootLayoutProps) => (
 	<html lang="en">
 		<body className="sidebar-collapsed">
-			<StyleRegistry>
-				<ClientProviders>
-					<main>{children}</main>
-				</ClientProviders>
-			</StyleRegistry>
+			<ClientProviders>
+				<main>{children}</main>
+			</ClientProviders>
 		</body>
 	</html>
 );

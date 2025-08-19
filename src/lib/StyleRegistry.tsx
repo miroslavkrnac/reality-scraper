@@ -13,5 +13,9 @@ export const StyleRegistry = ({ children }: { children: React.ReactNode }) => {
 		return <style dangerouslySetInnerHTML={{ __html: styleText }} />;
 	});
 
-	return <StyleProvider cache={cache}>{children}</StyleProvider>;
+	return (
+		<StyleProvider cache={cache} hashPriority="high">
+			{children}
+		</StyleProvider>
+	);
 };
