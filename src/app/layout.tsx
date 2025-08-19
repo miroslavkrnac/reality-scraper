@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { ClientProviders } from './providers';
 import './globals.scss';
-import './antd.min.css';
 
 export const metadata: Metadata = {
 	title: 'Reality Scraper',
