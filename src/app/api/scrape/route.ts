@@ -33,6 +33,17 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 		log('Starting scraping of', url);
 
+		// @NOTE: Get the last record for this type to check for existing realities (including deleted ones)
+		const lastRecord = await db.reality.findFirst({
+			where: {
+				type: type as RealityType,
+			},
+			orderBy: { id: 'desc' },
+			select: { reality_id: true },
+		});
+
+		log(`Last record for type ${type}:`, lastRecord?.reality_id || 'none');
+
 		const allEstates = await scrapePage(url, async page => {
 			// @NOTE: Check if we can find the estates list
 			try {
@@ -48,8 +59,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 				log('Estates list found successfully');
 			}
 
-			// @NOTE: Recursive function to scrape all pages
-			const scrapeAllPages = async (): Promise<
+			// @NOTE: Recursive function to scrape pages until existing reality is found
+			const scrapePagesUntilExisting = async (): Promise<
 				Array<{
 					id: string | undefined;
 					link: string | undefined;
@@ -79,6 +90,20 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 				log(`Extracted ${pageEstates.length} estates from current page`);
 
+				// @NOTE: Check if any of the scraped estates already exist in database
+				const existingRealityFound = pageEstates.some(
+					estate => estate.id && estate.id === lastRecord?.reality_id,
+				);
+
+				if (existingRealityFound) {
+					log(`Found existing reality ${lastRecord?.reality_id} on current page - stopping scraping`);
+					// @NOTE: Return estates up to the existing one (exclusive)
+					const estatesUpToExisting = pageEstates.filter(
+						estate => estate.id && estate.id !== lastRecord?.reality_id,
+					);
+					return estatesUpToExisting;
+				}
+
 				// @NOTE: Check if there's a "show-more-btn" and click it
 				const showMoreBtn = await page.$('[data-e2e="show-more-btn"]');
 				if (!showMoreBtn) {
@@ -104,11 +129,11 @@ export async function POST(request: Request): Promise<NextResponse> {
 				);
 
 				// @NOTE: Recursively scrape the next page and combine results
-				const nextPageEstates = await scrapeAllPages();
+				const nextPageEstates = await scrapePagesUntilExisting();
 				return [...pageEstates, ...nextPageEstates];
 			};
 
-			return scrapeAllPages();
+			return scrapePagesUntilExisting();
 		});
 
 		log('Scraping completed successfully');
