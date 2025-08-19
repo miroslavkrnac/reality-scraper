@@ -34,7 +34,9 @@ const scrapeAllUrls = async () => {
 		try {
 			console.log(`📡 Scraping ${type} from: ${url}`);
 			
-			const response = await fetch('http://localhost:3005/api/scrape', {
+			// @NOTE: Since API and cron are in the same container, use localhost
+			const apiUrl = 'http://localhost:3005';
+			const response = await fetch(`${apiUrl}/api/scrape`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

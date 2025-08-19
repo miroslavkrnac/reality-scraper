@@ -145,5 +145,3 @@ export const scrapePage = async (url: string, evaluate: (page: Page) => Promise<
 		}
 	}
 };
-
-

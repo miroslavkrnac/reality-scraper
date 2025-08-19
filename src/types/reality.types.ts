@@ -12,5 +12,3 @@ export interface Reality {
 	liked: boolean;
 	deleted: boolean;
 }
-
-
