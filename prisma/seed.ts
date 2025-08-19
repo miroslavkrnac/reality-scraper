@@ -251,7 +251,6 @@ const main = async () => {
 	console.log('🌱 Starting seed...');
 
 	// @NOTE: Clear existing data
-	await prisma.liked.deleteMany();
 	await prisma.reality.deleteMany();
 	await prisma.user.deleteMany();
 	console.log('🗑️  Cleared existing data');
@@ -270,59 +269,19 @@ const main = async () => {
 	});
 	console.log(`✅ Created ${realities.count} realities`);
 
-	// @NOTE: Get the created users and realities to get their actual IDs
-	const createdUsers = await prisma.user.findMany({
+	// @NOTE: Update some realities to be liked (for demonstration)
+	const realitiesToUpdate = await prisma.reality.findMany({
 		orderBy: { id: 'asc' },
-	});
-	const createdRealities = await prisma.reality.findMany({
-		orderBy: { id: 'asc' },
+		take: 10, // @NOTE: Like first 10 realities
 	});
 
-	// @NOTE: Create some sample likes using actual IDs
-	const sampleLikes = [
-		// @NOTE: Popular personal properties
-		{ realityId: createdRealities[0].id, userId: createdUsers[0].id }, // John likes Cozy Downtown Apartment
-		{ realityId: createdRealities[0].id, userId: createdUsers[1].id }, // Jane likes Cozy Downtown Apartment
-		{ realityId: createdRealities[0].id, userId: createdUsers[2].id }, // Bob likes Cozy Downtown Apartment
-		{ realityId: createdRealities[1].id, userId: createdUsers[0].id }, // John likes Modern City Loft
-		{ realityId: createdRealities[1].id, userId: createdUsers[3].id }, // Alice likes Modern City Loft
-		{ realityId: createdRealities[2].id, userId: createdUsers[1].id }, // Jane likes Family Home in Suburbs
-		{ realityId: createdRealities[2].id, userId: createdUsers[4].id }, // Charlie likes Family Home in Suburbs
-		
-		// @NOTE: Investment properties
-		{ realityId: createdRealities[5].id, userId: createdUsers[0].id }, // John likes Student Housing Complex
-		{ realityId: createdRealities[6].id, userId: createdUsers[1].id }, // Jane likes Luxury Rental Apartment
-		{ realityId: createdRealities[7].id, userId: createdUsers[2].id }, // Bob likes Short-term Vacation Rental
-		{ realityId: createdRealities[8].id, userId: createdUsers[3].id }, // Alice likes Office Space Conversion
-		{ realityId: createdRealities[9].id, userId: createdUsers[4].id }, // Charlie likes Multi-unit Building
-		
-		// @NOTE: Land properties
-		{ realityId: createdRealities[10].id, userId: createdUsers[0].id }, // John likes Countryside Estate
-		{ realityId: createdRealities[11].id, userId: createdUsers[1].id }, // Jane likes Garden Plot in City
-		{ realityId: createdRealities[12].id, userId: createdUsers[2].id }, // Bob likes Mountain Cabin Site
-		{ realityId: createdRealities[13].id, userId: createdUsers[3].id }, // Alice likes Farmland for Hobby
-		{ realityId: createdRealities[14].id, userId: createdUsers[4].id }, // Charlie likes Private Forest Land
-		
-		// @NOTE: Development properties
-		{ realityId: createdRealities[15].id, userId: createdUsers[0].id }, // John likes Commercial Development Site
-		{ realityId: createdRealities[16].id, userId: createdUsers[1].id }, // Jane likes Industrial Zone Land
-		{ realityId: createdRealities[17].id, userId: createdUsers[2].id }, // Bob likes Residential Development Plot
-		{ realityId: createdRealities[18].id, userId: createdUsers[3].id }, // Alice likes Shopping Center Location
-		{ realityId: createdRealities[19].id, userId: createdUsers[4].id }, // Charlie likes Hotel Construction Site
-		
-		// @NOTE: Mixed properties
-		{ realityId: createdRealities[20].id, userId: createdUsers[0].id }, // John likes Mixed-use Building
-		{ realityId: createdRealities[21].id, userId: createdUsers[1].id }, // Jane likes Heritage Property
-		{ realityId: createdRealities[22].id, userId: createdUsers[2].id }, // Bob likes Eco-friendly Development
-		{ realityId: createdRealities[23].id, userId: createdUsers[3].id }, // Alice likes Waterfront Property
-		{ realityId: createdRealities[24].id, userId: createdUsers[4].id }, // Charlie likes Tech Hub Location
-	];
-
-	await prisma.liked.createMany({
-		data: sampleLikes,
-		skipDuplicates: true,
-	});
-	console.log(`✅ Created ${sampleLikes.length} likes`);
+	for (const reality of realitiesToUpdate) {
+		await prisma.reality.update({
+			where: { id: reality.id },
+			data: { liked: true },
+		});
+	}
+	console.log(`✅ Updated ${realitiesToUpdate.length} realities as liked`);
 
 	console.log('🌱 Seed completed!');
 };

@@ -1,4 +1,4 @@
-import type { RealityWithLikedUsers } from '@/types/reality.types';
+import type { Reality } from '@/types/reality.types';
 import { getRealities } from '@/utils/reality.utils';
 import type { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -11,6 +11,7 @@ vi.mock('@/lib/db', () => {
 			findMany: vi.fn(),
 			delete: vi.fn(),
 			findUnique: vi.fn(),
+			update: vi.fn(),
 		},
 		deleted: {
 			create: vi.fn(),
@@ -53,24 +54,30 @@ describe('/api/realities', () => {
 
 	describe('GET', () => {
 		it('should return realities with liked users', async () => {
-			const mockRealities: RealityWithLikedUsers[] = [
+			const mockRealities: Reality[] = [
 				{
 					id: 1,
-					name: 'Reality One',
-					liked: [
-						{
-							user: {
-								id: 21,
-								name: 'John Doe',
-								email: 'john@example.com',
-							},
-						},
-					],
+					link: '/detail/test1',
+					img_src: 'https://example.com/img1.jpg',
+					title: 'Reality One',
+					location: 'Test Location 1',
+					price: '1,000,000 Kč',
+					reality_id: 'test1',
+					type: 'FLAT_PERSONAL',
+					liked: true,
+					deleted: false,
 				},
 				{
 					id: 2,
-					name: 'Reality Two',
-					liked: [],
+					link: '/detail/test2',
+					img_src: 'https://example.com/img2.jpg',
+					title: 'Reality Two',
+					location: 'Test Location 2',
+					price: '2,000,000 Kč',
+					reality_id: 'test2',
+					type: 'FLAT_INVESTMENT',
+					liked: false,
+					deleted: false,
 				},
 			];
 
@@ -108,11 +115,7 @@ describe('/api/realities', () => {
 	describe('DELETE', () => {
 		it('should delete a reality successfully', async () => {
 			const { db } = await import('@/lib/db');
-			const mockReality = {
-				reality_id: 'test1',
-				type: 'FLAT_PERSONAL' as const,
-			};
-			const mockDeletedReality = {
+			const mockUpdatedReality = {
 				id: 1,
 				link: '/detail/test1',
 				img_src: 'https://example.com/img1.jpg',
@@ -121,17 +124,11 @@ describe('/api/realities', () => {
 				price: '1,000,000 Kč',
 				reality_id: 'test1',
 				type: 'FLAT_PERSONAL' as const,
-			};
-			const mockDeletedRecord = {
-				id: 1,
-				reality_id: 'test1',
-				type: 'FLAT_PERSONAL' as const,
-				deleted_at: new Date(),
+				liked: false,
+				deleted: true,
 			};
 
-			vi.mocked(db.reality.findUnique).mockResolvedValue(mockReality);
-			vi.mocked(db.reality.delete).mockResolvedValue(mockDeletedReality);
-			vi.mocked(db.deleted.create).mockResolvedValue(mockDeletedRecord);
+			vi.mocked(db.reality.update).mockResolvedValue(mockUpdatedReality);
 
 			const request = createTestRequest('/api/realities', 'DELETE', {
 				realityId: 1,
@@ -140,21 +137,12 @@ describe('/api/realities', () => {
 			const response = await DELETE(request);
 			const data = await response.json();
 
-			expect(db.reality.findUnique).toHaveBeenCalledWith({
+			expect(db.reality.update).toHaveBeenCalledWith({
 				where: { id: 1 },
-				select: { reality_id: true, type: true },
-			});
-			expect(db.reality.delete).toHaveBeenCalledWith({
-				where: { id: 1 },
-			});
-			expect(db.deleted.create).toHaveBeenCalledWith({
-				data: {
-					reality_id: 'test1',
-					type: 'FLAT_PERSONAL',
-				},
+				data: { deleted: true },
 			});
 			expect(response.status).toBe(200);
-			expect(data).toEqual({ success: true, deleted: mockDeletedReality });
+			expect(data).toEqual({ success: true, updated: mockUpdatedReality });
 		});
 
 		it('should return 400 if realityId is missing', async () => {
@@ -167,9 +155,9 @@ describe('/api/realities', () => {
 			expect(data).toEqual({ error: 'Reality ID is required' });
 		});
 
-		it('should return 404 if reality is not found', async () => {
+		it('should return 500 if reality is not found', async () => {
 			const { db } = await import('@/lib/db');
-			vi.mocked(db.reality.findUnique).mockResolvedValue(null);
+			vi.mocked(db.reality.update).mockRejectedValue(new Error('Record to update not found'));
 
 			const request = createTestRequest('/api/realities', 'DELETE', {
 				realityId: 999,
@@ -178,14 +166,13 @@ describe('/api/realities', () => {
 			const response = await DELETE(request);
 			const data = await response.json();
 
-			expect(response.status).toBe(404);
-			expect(data).toEqual({ error: 'Reality not found' });
+			expect(response.status).toBe(500);
+			expect(data).toEqual({ error: 'Failed to delete reality', details: 'Record to update not found' });
 		});
 
 		it('should handle database errors', async () => {
 			const { db } = await import('@/lib/db');
-			vi.mocked(db.reality.findUnique).mockResolvedValue({ reality_id: 'test1' });
-			vi.mocked(db.reality.delete).mockRejectedValue(new Error('Database error'));
+			vi.mocked(db.reality.update).mockRejectedValue(new Error('Database error'));
 
 			const request = createTestRequest('/api/realities', 'DELETE', {
 				realityId: 1,

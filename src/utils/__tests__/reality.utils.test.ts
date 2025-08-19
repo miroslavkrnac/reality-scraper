@@ -1,4 +1,4 @@
-import type { RealityWithLikedUsers } from '@/types/reality.types';
+import type { Reality } from '@/types/reality.types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { deleteReality, fetchRealities, getRealities } from '../reality.utils';
 
@@ -24,7 +24,7 @@ describe('reality.utils', () => {
 
 	describe('getRealities', () => {
 		it('should fetch realities from database', async () => {
-			const mockRealities: RealityWithLikedUsers[] = [
+			const mockRealities: Reality[] = [
 				{
 					id: 1,
 					link: '/detail/test1',
@@ -34,7 +34,8 @@ describe('reality.utils', () => {
 					price: '1,000,000 Kč',
 					reality_id: 'test1',
 					type: 'FLAT_PERSONAL',
-					liked: [],
+					liked: true,
+					deleted: false,
 				},
 				{
 					id: 2,
@@ -45,7 +46,8 @@ describe('reality.utils', () => {
 					price: '2,000,000 Kč',
 					reality_id: 'test2',
 					type: 'FLAT_INVESTMENT',
-					liked: [],
+					liked: false,
+					deleted: false,
 				},
 			];
 
@@ -55,20 +57,8 @@ describe('reality.utils', () => {
 			const result = await getRealities();
 
 			expect(db.reality.findMany).toHaveBeenCalledWith({
+				where: { deleted: false },
 				orderBy: { id: 'asc' },
-				include: {
-					liked: {
-						include: {
-							user: {
-								select: {
-									id: true,
-									name: true,
-									email: true,
-								},
-							},
-						},
-					},
-				},
 			});
 			expect(result).toEqual(mockRealities);
 		});
@@ -85,7 +75,7 @@ describe('reality.utils', () => {
 
 	describe('fetchRealities', () => {
 		it('should fetch realities from API', async () => {
-			const mockRealities: RealityWithLikedUsers[] = [
+			const mockRealities: Reality[] = [
 				{
 					id: 1,
 					link: '/detail/test1',
@@ -95,7 +85,8 @@ describe('reality.utils', () => {
 					price: '1,000,000 Kč',
 					reality_id: 'test1',
 					type: 'FLAT_PERSONAL',
-					liked: [],
+					liked: true,
+					deleted: false,
 				},
 			];
 

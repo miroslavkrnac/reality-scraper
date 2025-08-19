@@ -19,32 +19,14 @@ export const DELETE = async (request: Request) => {
 			return NextResponse.json({ error: 'Reality ID is required' }, { status: 400 });
 		}
 
-		// @NOTE: Get the reality before deleting to get its reality_id and type
-		const reality = await db.reality.findUnique({
+		// @NOTE: Update the reality to mark it as deleted instead of actually deleting it
+		const updatedReality = await db.reality.update({
 			where: { id: realityId },
-			select: { reality_id: true, type: true },
+			data: { deleted: true },
 		});
 
-		if (!reality) {
-			return NextResponse.json({ error: 'Reality not found' }, { status: 404 });
-		}
-
-		// @NOTE: Delete the reality and all related liked records
-		const deletedReality = await db.reality.delete({
-			where: { id: realityId },
-		});
-
-		// @NOTE: Create record in deleted table
-		await db.deleted.create({
-			data: {
-				reality_id: reality.reality_id,
-				type: reality.type,
-			},
-		});
-
-		return NextResponse.json({ success: true, deleted: deletedReality });
+		return NextResponse.json({ success: true, updated: updatedReality });
 	} catch (error) {
-		// @NOTE: Log error for debugging
 		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 		return NextResponse.json({ error: 'Failed to delete reality', details: errorMessage }, { status: 500 });
 	}

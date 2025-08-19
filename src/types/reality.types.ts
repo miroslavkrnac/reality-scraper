@@ -9,16 +9,12 @@ export interface Reality {
 	price: string;
 	reality_id: string;
 	type: RealityType;
+	liked: boolean;
+	deleted: boolean;
 }
 
 export interface User {
 	id: number;
 	name: string;
 	email: string;
-}
-
-export interface RealityWithLikedUsers extends Reality {
-	liked: {
-		user: User;
-	}[];
 }

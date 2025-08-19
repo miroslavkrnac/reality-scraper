@@ -1,14 +1,12 @@
-import type { RealityWithLikedUsers } from '@/types/reality.types';
+import type { Reality } from '@/types/reality.types';
 import { fetchRealities } from '@/utils/reality.utils';
 import useSWR from 'swr';
 
 // @NOTE: SWR fetcher function
-const realitiesFetcher = async (): Promise<RealityWithLikedUsers[]> => {
-	return await fetchRealities();
-};
+const realitiesFetcher = async (): Promise<Reality[]> => fetchRealities();
 
 export const useRealities = () => {
-	const { data, error, isLoading } = useSWR('/api/realities', realitiesFetcher, {
+	const { data, error, isLoading, mutate } = useSWR('/api/realities', realitiesFetcher, {
 		// @NOTE: Configuration to prevent duplicate calls
 		revalidateOnFocus: false,
 		revalidateOnReconnect: false,
@@ -19,5 +17,6 @@ export const useRealities = () => {
 		realities: data || [],
 		loading: isLoading,
 		error: error ? 'Failed to load realities' : null,
+		mutate, // @NOTE: Expose mutate function to manually refresh data
 	};
 };

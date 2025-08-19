@@ -14,7 +14,6 @@ model User {
   id    Int @id @default(autoincrement())
   name  String
   email String @unique
-  liked Liked[]
 
   @@map("users")
 }
@@ -36,28 +35,9 @@ model Reality {
   price      String
   reality_id String
   type       RealityType @default(FLAT_PERSONAL)
-  liked      Liked[]
+  liked      Boolean     @default(false)
+  deleted    Boolean     @default(false)
 
   @@unique([reality_id, type])
   @@map("realities")
-}
-
-model Liked {
-  id        Int @id @default(autoincrement())
-  realityId Int
-  userId    Int
-  reality   Reality @relation(fields: [realityId], references: [id])
-  user      User   @relation(fields: [userId], references: [id])
-
-  @@map("liked")
-}
-
-model Deleted {
-  id         Int         @id @default(autoincrement())
-  reality_id String
-  type       RealityType @default(FLAT_PERSONAL)
-  deleted_at DateTime    @default(now())
-
-  @@unique([reality_id, type])
-  @@map("deleted")
 }

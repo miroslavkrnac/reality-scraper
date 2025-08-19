@@ -1,25 +1,22 @@
 'use client';
 
-import { useLikedRealities } from '@/hooks/useLikedRealities';
 import { useRealities } from '@/hooks/useRealities';
-import type { RealityType, RealityWithLikedUsers } from '@/types/reality.types';
-import { deleteReality } from '@/utils/reality.utils';
+import type { Reality, RealityType } from '@/types/reality.types';
+import { deleteReality, toggleLike } from '@/utils/reality.utils';
 import { DeleteOutlined, EyeOutlined, FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Input, Modal, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './page.module.scss';
 
 const { Title, Text } = Typography;
 
 const RealitiesPage = () => {
-	const { realities, loading, error } = useRealities();
-	const { isLiked, toggleLike, loading: likedLoading } = useLikedRealities();
+	const { realities, loading, error, mutate } = useRealities();
 	const { message } = App.useApp();
 
 	// @NOTE: Filter state
 	const [nameFilter, setNameFilter] = useState('');
-	const [likedFilter, setLikedFilter] = useState<'all' | 'liked' | 'not-liked'>('all');
 	const [typeFilter, setTypeFilter] = useState<'all' | RealityType>('all');
 
 	// @NOTE: Pagination state
@@ -27,12 +24,24 @@ const RealitiesPage = () => {
 
 	// @NOTE: Modal state
 	const [isModalVisible, setIsModalVisible] = useState(false);
-	const [selectedReality, setSelectedReality] = useState<RealityWithLikedUsers | null>(null);
+	const [selectedReality, setSelectedReality] = useState<Reality | null>(null);
 
 	// @NOTE: Delete confirmation modal state
 	const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-	const [realityToDelete, setRealityToDelete] = useState<RealityWithLikedUsers | null>(null);
+	const [realityToDelete, setRealityToDelete] = useState<Reality | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState(false);
+
+	// @NOTE: Like toggle loading state
+	const [likeLoading, setLikeLoading] = useState(false);
+
+	// @NOTE: Check if a reality is liked based on the reality data
+	const isLiked = useCallback(
+		(realityId: number): boolean => {
+			const reality = realities.find(r => r.id === realityId);
+			return reality?.liked || false;
+		},
+		[realities],
+	);
 
 	// @NOTE: Filtered data
 	const filteredRealities = useMemo(() => {
@@ -40,39 +49,36 @@ const RealitiesPage = () => {
 			// @NOTE: Title filter (replaces name filter)
 			const matchesTitle = reality.title.toLowerCase().includes(nameFilter.toLowerCase());
 
-			// @NOTE: Liked filter
-			let matchesLiked = true;
-			if (likedFilter === 'liked') {
-				matchesLiked = isLiked(reality.id);
-			} else if (likedFilter === 'not-liked') {
-				matchesLiked = !isLiked(reality.id);
-			}
-
 			// @NOTE: Type filter
 			const matchesType = typeFilter === 'all' || reality.type === typeFilter;
 
-			return matchesTitle && matchesLiked && matchesType;
+			return matchesTitle && matchesType;
 		});
-	}, [realities, nameFilter, likedFilter, typeFilter, isLiked]);
+	}, [realities, nameFilter, typeFilter]);
 
 	// @NOTE: Reset to first page when filters change
 	// biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally reset page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [nameFilter, likedFilter, typeFilter]);
+	}, [nameFilter, typeFilter]);
 
 	const handleLikeToggle = async (realityId: number) => {
+		setLikeLoading(true);
 		const success = await toggleLike(realityId);
+		setLikeLoading(false);
+
 		if (success) {
 			const action = isLiked(realityId) ? 'unliked' : 'liked';
 			message.success(`Reality ${action} successfully!`);
+			// @NOTE: Refresh the data after successful like toggle
+			mutate();
 		} else {
 			message.error('Failed to update like status');
 		}
 	};
 
 	// @NOTE: Handle view reality details
-	const handleViewReality = (reality: RealityWithLikedUsers) => {
+	const handleViewReality = (reality: Reality) => {
 		setSelectedReality(reality);
 		setIsModalVisible(true);
 	};
@@ -89,17 +95,22 @@ const RealitiesPage = () => {
 			return;
 		}
 
+		setLikeLoading(true);
 		const success = await toggleLike(selectedReality.id);
+		setLikeLoading(false);
+
 		if (success) {
 			const action = isLiked(selectedReality.id) ? 'unliked' : 'liked';
 			message.success(`Reality ${action} successfully!`);
+			// @NOTE: Refresh the data after successful like toggle
+			mutate();
 		} else {
 			message.error('Failed to update like status');
 		}
 	};
 
 	// @NOTE: Handle delete reality
-	const handleDeleteReality = (reality: RealityWithLikedUsers) => {
+	const handleDeleteReality = (reality: Reality) => {
 		setRealityToDelete(reality);
 		setIsDeleteModalVisible(true);
 	};
@@ -118,8 +129,8 @@ const RealitiesPage = () => {
 			message.success('Reality deleted successfully!');
 			setIsDeleteModalVisible(false);
 			setRealityToDelete(null);
-			// @NOTE: Refresh the realities list
-			window.location.reload();
+			// @NOTE: Refresh the realities data without reloading the page
+			mutate();
 		} else {
 			message.error('Failed to delete reality');
 		}
@@ -134,12 +145,11 @@ const RealitiesPage = () => {
 	// @NOTE: Clear all filters
 	const clearFilters = () => {
 		setNameFilter('');
-		setLikedFilter('all');
 		setTypeFilter('all');
 		setCurrentPage(1); // @NOTE: Reset to first page when clearing filters
 	};
 
-	const columns: ColumnsType<RealityWithLikedUsers> = [
+	const columns: ColumnsType<Reality> = [
 		{
 			title: 'ID',
 			dataIndex: 'id',
@@ -181,25 +191,7 @@ const RealitiesPage = () => {
 				return typeLabels[type];
 			},
 		},
-		{
-			title: 'Liked by',
-			key: 'likedBy',
-			width: 200,
-			render: (_, record) => {
-				const likedUsers = record.liked.map(like => like.user.name);
-				if (likedUsers.length === 0) {
-					return <span style={{ color: '#999', fontStyle: 'italic' }}>No likes</span>;
-				}
-				if (likedUsers.length <= 2) {
-					return <span>{likedUsers.join(', ')}</span>;
-				}
-				return (
-					<span>
-						{likedUsers.slice(0, 2).join(', ')} and {likedUsers.length - 2} more
-					</span>
-				);
-			},
-		},
+
 		{
 			title: 'Actions',
 			key: 'actions',
@@ -215,11 +207,11 @@ const RealitiesPage = () => {
 					/>
 					<Button
 						type="text"
-						icon={isLiked(record.id) ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+						icon={record.liked ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
 						onClick={() => handleLikeToggle(record.id)}
-						loading={likedLoading}
+						loading={likeLoading}
 						className={styles.actionButton}
-						title={isLiked(record.id) ? 'Unlike' : 'Like'}
+						title={record.liked ? 'Unlike' : 'Like'}
 					/>
 					<Button
 						type="text"
@@ -252,16 +244,7 @@ const RealitiesPage = () => {
 							style={{ width: 200 }}
 							allowClear
 						/>
-						<Select
-							value={likedFilter}
-							onChange={setLikedFilter}
-							style={{ width: 150 }}
-							options={[
-								{ value: 'all', label: 'All Realities' },
-								{ value: 'liked', label: 'Liked Only' },
-								{ value: 'not-liked', label: 'Not Liked' },
-							]}
-						/>
+
 						<Select
 							value={typeFilter}
 							onChange={setTypeFilter}
@@ -278,12 +261,12 @@ const RealitiesPage = () => {
 						<Button
 							icon={<FilterOutlined />}
 							onClick={clearFilters}
-							disabled={nameFilter === '' && likedFilter === 'all' && typeFilter === 'all'}
+							disabled={nameFilter === '' && typeFilter === 'all'}
 						>
 							Clear Filters
 						</Button>
 					</Space>
-					{(nameFilter || likedFilter !== 'all' || typeFilter !== 'all') && (
+					{(nameFilter || typeFilter !== 'all') && (
 						<div className={styles.filterInfo}>
 							Showing {filteredRealities.length} of {realities.length} realities
 						</div>
@@ -310,7 +293,7 @@ const RealitiesPage = () => {
 								<Empty
 									image={Empty.PRESENTED_IMAGE_SIMPLE}
 									description={
-										nameFilter || likedFilter !== 'all' || typeFilter !== 'all'
+										nameFilter || typeFilter !== 'all'
 											? 'No realities match your filters'
 											: 'No realities found'
 									}
@@ -511,7 +494,7 @@ const RealitiesPage = () => {
 											type={isLiked(selectedReality.id) ? 'primary' : 'default'}
 											icon={isLiked(selectedReality.id) ? <HeartFilled /> : <HeartOutlined />}
 											onClick={handleModalLikeToggle}
-											loading={likedLoading}
+											loading={likeLoading}
 											style={{
 												width: '100%',
 												height: '48px',

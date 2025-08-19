@@ -18,11 +18,14 @@ export async function POST(request: Request): Promise<NextResponse> {
 			);
 		}
 
-		if (!type || !['FLAT_PERSONAL', 'FLAT_INVESTMENT', 'LAND_PERSONAL', 'LAND_INVESTMENT'].includes(type)) {
+		if (
+			!type ||
+			!['FLAT_PERSONAL', 'FLAT_INVESTMENT', 'LAND_PERSONAL', 'LAND_INVESTMENT', 'OTHER'].includes(type)
+		) {
 			return NextResponse.json(
 				{
 					success: false,
-					error: 'Type is required and must be one of: FLAT_PERSONAL, FLAT_INVESTMENT, LAND_PERSONAL, LAND_INVESTMENT',
+					error: 'Type is required and must be one of: FLAT_PERSONAL, FLAT_INVESTMENT, LAND_PERSONAL, LAND_INVESTMENT, OTHER',
 				},
 				{ status: 400 },
 			);
@@ -116,8 +119,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 		for (const estate of allEstates) {
 			if (estate.id && estate.link && estate.title && estate.location && estate.price) {
 				try {
-					// @NOTE: Check if this estate is in the deleted table
-					const deletedRecord = await db.deleted.findUnique({
+					// @NOTE: Check if this estate is marked as deleted
+					const existingReality = await db.reality.findUnique({
 						where: {
 							reality_id_type: {
 								reality_id: estate.id,
@@ -126,7 +129,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 						},
 					});
 
-					if (deletedRecord) {
+					if (existingReality?.deleted) {
 						log(`Skipping estate ${estate.id} (${type}) - it was previously deleted`);
 						skippedEstates.push(estate.id);
 						continue;
