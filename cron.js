@@ -67,6 +67,10 @@ cron.schedule(
 	},
 );
 
+scrapeAllUrls().catch(error => {
+	console.error('❌ Error starting initial :', error);
+});
+
 console.log('✅ Cron job scheduled successfully - will run every 30 minutes');
 
 // @NOTE: Keep the process running
