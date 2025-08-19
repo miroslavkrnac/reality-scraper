@@ -1,4 +1,4 @@
-import { MenuFoldOutlined, MenuUnfoldOutlined, TableOutlined } from '@ant-design/icons';
+import { DeleteOutlined, MenuFoldOutlined, MenuUnfoldOutlined, TableOutlined } from '@ant-design/icons';
 import { Button, Menu } from 'antd';
 import type { MenuProps } from 'antd';
 import Link from 'next/link';
@@ -13,6 +13,11 @@ const items: MenuItem[] = [
 		key: '/realities',
 		icon: <TableOutlined />,
 		label: <Link href="/realities">Realities</Link>,
+	},
+	{
+		key: '/deleted',
+		icon: <DeleteOutlined />,
+		label: <Link href="/deleted">Deleted Realities</Link>,
 	},
 ];
 

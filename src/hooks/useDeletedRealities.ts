@@ -1,12 +1,12 @@
 import type { Reality } from '@/types/reality.types';
-import { fetchRealities } from '@/utils/reality.utils';
+import { fetchDeletedRealities } from '@/utils/deleted.utils';
 import useSWR from 'swr';
 
 // @NOTE: SWR fetcher function
-const realitiesFetcher = async (): Promise<Reality[]> => fetchRealities();
+const deletedRealitiesFetcher = async (): Promise<Reality[]> => fetchDeletedRealities();
 
-export const useRealities = () => {
-	const { data, error, isLoading, mutate } = useSWR('/api/realities', realitiesFetcher, {
+export const useDeletedRealities = () => {
+	const { data, error, isLoading, mutate } = useSWR('/api/deleted', deletedRealitiesFetcher, {
 		// @NOTE: Configuration to always load fresh data - no caching
 		revalidateOnFocus: true,
 		revalidateOnReconnect: true,
@@ -17,9 +17,9 @@ export const useRealities = () => {
 	});
 
 	return {
-		realities: data || [],
+		deletedRealities: data || [],
 		loading: isLoading,
-		error: error ? 'Failed to load realities' : null,
+		error: error ? 'Failed to load deleted realities' : null,
 		mutate, // @NOTE: Expose mutate function to manually refresh data
 	};
 };

@@ -5,7 +5,13 @@ import { NextResponse } from 'next/server';
 export const GET = async () => {
 	try {
 		const realities = await getRealities();
-		return NextResponse.json(realities);
+		return NextResponse.json(realities, {
+			headers: {
+				'Cache-Control': 'no-cache, no-store, must-revalidate',
+				Pragma: 'no-cache',
+				Expires: '0',
+			},
+		});
 	} catch (_error) {
 		return NextResponse.json({ error: 'Failed to fetch realities' }, { status: 500 });
 	}
