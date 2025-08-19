@@ -69,9 +69,11 @@ cron.schedule(
 	},
 );
 
-scrapeAllUrls().catch(error => {
-	console.error('❌ Error starting initial :', error);
-});
+setTimeout(() => {
+	scrapeAllUrls().catch(error => {
+		console.error('❌ Error starting initial :', error);
+	});
+}, 10000);
 
 console.log('✅ Cron job scheduled successfully - will run every 30 minutes');
 
