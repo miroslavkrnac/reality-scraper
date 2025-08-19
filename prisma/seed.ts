@@ -2,14 +2,6 @@ import { PrismaClient, RealityType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const fakeUsers = [
-	{ name: 'John Doe', email: 'john@example.com' },
-	{ name: 'Jane Smith', email: 'jane@example.com' },
-	{ name: 'Bob Johnson', email: 'bob@example.com' },
-	{ name: 'Alice Brown', email: 'alice@example.com' },
-	{ name: 'Charlie Wilson', email: 'charlie@example.com' },
-];
-
 const fakeRealities = [
 	// @NOTE: Flat Personal - for personal use
 	{ 
@@ -252,15 +244,7 @@ const main = async () => {
 
 	// @NOTE: Clear existing data
 	await prisma.reality.deleteMany();
-	await prisma.user.deleteMany();
 	console.log('🗑️  Cleared existing data');
-
-	// @NOTE: Create users
-	const users = await prisma.user.createMany({
-		data: fakeUsers,
-		skipDuplicates: true,
-	});
-	console.log(`✅ Created ${users.count} users`);
 
 	// @NOTE: Create realities
 	const realities = await prisma.reality.createMany({
