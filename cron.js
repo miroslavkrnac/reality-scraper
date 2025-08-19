@@ -26,27 +26,48 @@ const SCRAPING_URLS = [
 	}
 ];
 
+// @NOTE: Scraping function
+const scrapeAllUrls = async () => {
+	console.log('🔄 Starting scraping job at', new Date().toISOString());
+	
+	for (const { url, type } of SCRAPING_URLS) {
+		try {
+			console.log(`📡 Scraping ${type} from: ${url}`);
+			
+			const response = await fetch('http://localhost:3000/api/scrape', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ url, type }),
+			});
 
-// const response = await fetch('http://localhost:3000'}/api/scrape`, {
-//     method: 'POST',
-//     headers: {
-//         'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify({ url, type }),
-// });
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
 
-// @NOTE: Test cron job - runs every 1 second
+			const result = await response.json();
+			console.log(`✅ Successfully scraped ${type}:`, result.data?.savedCount || 0, 'items saved');
+		} catch (error) {
+			console.error(`❌ Error scraping ${type}:`, error.message);
+		}
+	}
+	
+	console.log('🏁 Scraping job completed at', new Date().toISOString());
+};
+
+// @NOTE: Production cron job - runs every 30 minutes
 cron.schedule(
-	'*/15 * * * * *',
-	() => {
-		console.log('⏰ Test cron job running every 15 seconds');
+	'*/30 * * * *',
+	async () => {
+		await scrapeAllUrls();
 	},
 	{
 		timezone: 'UTC',
 	},
 );
 
-console.log('✅ Cron job scheduled successfully');
+console.log('✅ Cron job scheduled successfully - will run every 30 minutes');
 
 // @NOTE: Keep the process running
 process.on('SIGINT', () => {
