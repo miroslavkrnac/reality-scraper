@@ -18,6 +18,7 @@ const RealitiesPage = () => {
 	// @NOTE: Filter state
 	const [nameFilter, setNameFilter] = useState('');
 	const [typeFilter, setTypeFilter] = useState<'all' | RealityType>('all');
+	const [likedFilter, setLikedFilter] = useState<'all' | 'liked' | 'not-liked'>('all');
 
 	// @NOTE: Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
@@ -52,15 +53,21 @@ const RealitiesPage = () => {
 			// @NOTE: Type filter
 			const matchesType = typeFilter === 'all' || reality.type === typeFilter;
 
-			return matchesTitle && matchesType;
+			// @NOTE: Liked filter
+			const matchesLiked =
+				likedFilter === 'all' ||
+				(likedFilter === 'liked' && reality.liked) ||
+				(likedFilter === 'not-liked' && !reality.liked);
+
+			return matchesTitle && matchesType && matchesLiked;
 		});
-	}, [realities, nameFilter, typeFilter]);
+	}, [realities, nameFilter, typeFilter, likedFilter]);
 
 	// @NOTE: Reset to first page when filters change
 	// biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally reset page when filters change
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [nameFilter, typeFilter]);
+	}, [nameFilter, typeFilter, likedFilter]);
 
 	const handleLikeToggle = async (realityId: number) => {
 		setLikeLoading(true);
@@ -146,6 +153,7 @@ const RealitiesPage = () => {
 	const clearFilters = () => {
 		setNameFilter('');
 		setTypeFilter('all');
+		setLikedFilter('all');
 		setCurrentPage(1); // @NOTE: Reset to first page when clearing filters
 	};
 
@@ -258,15 +266,27 @@ const RealitiesPage = () => {
 								{ value: 'OTHER', label: 'Other' },
 							]}
 						/>
+
+						<Select
+							value={likedFilter}
+							onChange={setLikedFilter}
+							style={{ width: 150 }}
+							options={[
+								{ value: 'all', label: 'All' },
+								{ value: 'liked', label: 'Liked Only' },
+								{ value: 'not-liked', label: 'Not Liked' },
+							]}
+						/>
+
 						<Button
 							icon={<FilterOutlined />}
 							onClick={clearFilters}
-							disabled={nameFilter === '' && typeFilter === 'all'}
+							disabled={nameFilter === '' && typeFilter === 'all' && likedFilter === 'all'}
 						>
 							Clear Filters
 						</Button>
 					</Space>
-					{(nameFilter || typeFilter !== 'all') && (
+					{(nameFilter || typeFilter !== 'all' || likedFilter !== 'all') && (
 						<div className={styles.filterInfo}>
 							Showing {filteredRealities.length} of {realities.length} realities
 						</div>
