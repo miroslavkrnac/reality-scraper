@@ -58,11 +58,49 @@ const scrapeAllUrls = async () => {
 	console.log('🏁 Scraping job completed at', new Date().toISOString());
 };
 
+// @NOTE: Remove non-existing realities function
+const removeNonExistingRealities = async () => {
+	console.log('🧹 Starting remove non-existing realities job at', new Date().toISOString());
+	
+	try {
+		// @NOTE: Since API and cron are in the same container, use localhost
+		const apiUrl = 'http://localhost:3005';
+		const response = await fetch(`${apiUrl}/api/realities/removeNonExisting`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const result = await response.json();
+		console.log(`✅ Successfully removed non-existing realities:`, result);
+	} catch (error) {
+		console.error(`❌ Error removing non-existing realities:`, error);
+	}
+	
+	console.log('🏁 Remove non-existing realities job completed at', new Date().toISOString());
+};
+
 // @NOTE: Production cron job - runs every 30 minutes
 cron.schedule(
 	'*/30 * * * *',
 	async () => {
 		await scrapeAllUrls();
+	},
+	{
+		timezone: 'UTC',
+	},
+);
+
+// @NOTE: Remove non-existing realities cron job - runs every 4 hours
+cron.schedule(
+	'0 */4 * * *',
+	async () => {
+		await removeNonExistingRealities();
 	},
 	{
 		timezone: 'UTC',
@@ -76,6 +114,7 @@ setTimeout(() => {
 }, 10000);
 
 console.log('✅ Cron job scheduled successfully - will run every 30 minutes');
+console.log('✅ Remove non-existing realities cron job scheduled successfully - will run every 4 hours');
 
 // @NOTE: Keep the process running
 process.on('SIGINT', () => {
