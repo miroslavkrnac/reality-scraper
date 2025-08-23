@@ -2,7 +2,13 @@
 
 import { useRealities } from '@/hooks/useRealities';
 import type { Reality, RealityType } from '@/types/reality.types';
-import { calculatePricePerM2, deleteReality, formatPricePerM2, toggleLike } from '@/utils/reality.utils';
+import {
+	calculatePricePerM2,
+	deleteReality,
+	formatPricePerM2,
+	generateGoogleMapsUrl,
+	toggleLike,
+} from '@/utils/reality.utils';
 import { DeleteOutlined, EyeOutlined, FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Input, Modal, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -176,6 +182,16 @@ const RealitiesPage = () => {
 			dataIndex: 'location',
 			key: 'location',
 			sorter: (a, b) => a.location.localeCompare(b.location),
+			render: (location: string) => (
+				<a
+					href={generateGoogleMapsUrl(location)}
+					target="_blank"
+					rel="noopener noreferrer"
+					style={{ color: '#1890ff' }}
+				>
+					{location}
+				</a>
+			),
 		},
 		{
 			title: 'Price',
@@ -403,9 +419,22 @@ const RealitiesPage = () => {
 											<Text strong style={{ color: '#666' }}>
 												Location:
 											</Text>
-											<Text style={{ textAlign: 'right', maxWidth: '60%' }}>
-												{selectedReality.location}
-											</Text>
+											<div style={{ textAlign: 'right', maxWidth: '60%' }}>
+												<a
+													href={generateGoogleMapsUrl(selectedReality.location)}
+													target="_blank"
+													rel="noopener noreferrer"
+													style={{ color: '#1890ff', textDecoration: 'none' }}
+													onMouseEnter={e => {
+														e.currentTarget.style.textDecoration = 'underline';
+													}}
+													onMouseLeave={e => {
+														e.currentTarget.style.textDecoration = 'none';
+													}}
+												>
+													{selectedReality.location}
+												</a>
+											</div>
 										</div>
 
 										<div

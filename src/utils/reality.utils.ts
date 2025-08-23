@@ -131,3 +131,10 @@ export const formatPricePerM2 = (pricePerM2: number | null): string => {
 	// @NOTE: Format with thousands separators
 	return `${pricePerM2.toLocaleString()} Kč/m²`;
 };
+
+// @NOTE: Generate Google Maps URL from location string
+export const generateGoogleMapsUrl = (location: string): string => {
+	// @NOTE: Encode the location for URL
+	const encodedLocation = encodeURIComponent(location);
+	return `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`;
+};

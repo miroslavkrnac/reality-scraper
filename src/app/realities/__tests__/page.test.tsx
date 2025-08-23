@@ -34,6 +34,7 @@ vi.mock('@/utils/reality.utils', () => ({
 	toggleLike: mockToggleLike,
 	calculatePricePerM2: vi.fn().mockReturnValue(50000),
 	formatPricePerM2: vi.fn().mockReturnValue('50,000 Kč/m²'),
+	generateGoogleMapsUrl: vi.fn().mockReturnValue('https://www.google.com/maps/search/?api=1&query=Test%20Location'),
 }));
 
 // @NOTE: Mock Ant Design App component
