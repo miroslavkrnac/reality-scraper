@@ -109,7 +109,7 @@ export const extractPriceNumber = (price: string): number | null => {
 
 	return null;
 };
-m
+
 // @NOTE: Calculate price per square meter
 export const calculatePricePerM2 = (price: string, title: string): number | null => {
 	const priceNumber = extractPriceNumber(price);
