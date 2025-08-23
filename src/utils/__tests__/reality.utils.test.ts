@@ -7,7 +7,7 @@ import {
 	extractSquareMeters,
 	fetchRealities,
 	formatPricePerM2,
-	generateGoogleMapsUrl,
+	generateMapsUrl,
 	getRealities,
 } from '../reality.utils';
 
@@ -302,32 +302,30 @@ describe('Price per m² utilities', () => {
 	});
 });
 
-describe('Google Maps URL generation', () => {
-	describe('generateGoogleMapsUrl', () => {
-		it('should generate Google Maps URL for simple location', () => {
+describe('Mapy.cz URL generation', () => {
+	describe('generateMapsUrl', () => {
+		it('should generate Mapy.cz URL for simple location', () => {
 			const location = 'Prague, Czech Republic';
-			const result = generateGoogleMapsUrl(location);
-			expect(result).toBe('https://www.google.com/maps/search/?api=1&query=Prague%2C%20Czech%20Republic');
+			const result = generateMapsUrl(location);
+			expect(result).toBe('https://mapy.com/cs/zakladni?q=Prague%2C%20Czech%20Republic');
 		});
 
-		it('should generate Google Maps URL for location with special characters', () => {
+		it('should generate Mapy.cz URL for location with special characters', () => {
 			const location = 'Praha 1, Staré Město';
-			const result = generateGoogleMapsUrl(location);
-			expect(result).toBe(
-				'https://www.google.com/maps/search/?api=1&query=Praha%201%2C%20Star%C3%A9%20M%C4%9Bsto',
-			);
+			const result = generateMapsUrl(location);
+			expect(result).toBe('https://mapy.com/cs/zakladni?q=Praha%201%2C%20Star%C3%A9%20M%C4%9Bsto');
 		});
 
-		it('should generate Google Maps URL for location with spaces', () => {
+		it('should generate Mapy.cz URL for location with spaces', () => {
 			const location = 'New York City';
-			const result = generateGoogleMapsUrl(location);
-			expect(result).toBe('https://www.google.com/maps/search/?api=1&query=New%20York%20City');
+			const result = generateMapsUrl(location);
+			expect(result).toBe('https://mapy.com/cs/zakladni?q=New%20York%20City');
 		});
 
-		it('should generate Google Maps URL for empty location', () => {
+		it('should generate Mapy.cz URL for empty location', () => {
 			const location = '';
-			const result = generateGoogleMapsUrl(location);
-			expect(result).toBe('https://www.google.com/maps/search/?api=1&query=');
+			const result = generateMapsUrl(location);
+			expect(result).toBe('https://mapy.com/cs/zakladni?q=');
 		});
 	});
 });

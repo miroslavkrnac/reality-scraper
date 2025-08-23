@@ -109,7 +109,7 @@ export const extractPriceNumber = (price: string): number | null => {
 
 	return null;
 };
-
+m
 // @NOTE: Calculate price per square meter
 export const calculatePricePerM2 = (price: string, title: string): number | null => {
 	const priceNumber = extractPriceNumber(price);
@@ -132,9 +132,9 @@ export const formatPricePerM2 = (pricePerM2: number | null): string => {
 	return `${pricePerM2.toLocaleString()} Kč/m²`;
 };
 
-// @NOTE: Generate Google Maps URL from location string
-export const generateGoogleMapsUrl = (location: string): string => {
+// @NOTE: Generate Mapy.cz URL from location string
+export const generateMapsUrl = (location: string): string => {
 	// @NOTE: Encode the location for URL
 	const encodedLocation = encodeURIComponent(location);
-	return `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`;
+	return `https://mapy.com/cs/zakladni?q=${encodedLocation}`;
 };

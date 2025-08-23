@@ -6,7 +6,7 @@ import {
 	calculatePricePerM2,
 	deleteReality,
 	formatPricePerM2,
-	generateGoogleMapsUrl,
+	generateMapsUrl,
 	toggleLike,
 } from '@/utils/reality.utils';
 import { DeleteOutlined, EyeOutlined, FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
@@ -184,7 +184,7 @@ const RealitiesPage = () => {
 			sorter: (a, b) => a.location.localeCompare(b.location),
 			render: (location: string) => (
 				<a
-					href={generateGoogleMapsUrl(location)}
+					href={generateMapsUrl(location)}
 					target="_blank"
 					rel="noopener noreferrer"
 					style={{ color: '#1890ff' }}
@@ -421,7 +421,7 @@ const RealitiesPage = () => {
 											</Text>
 											<div style={{ textAlign: 'right', maxWidth: '60%' }}>
 												<a
-													href={generateGoogleMapsUrl(selectedReality.location)}
+													href={generateMapsUrl(selectedReality.location)}
 													target="_blank"
 													rel="noopener noreferrer"
 													style={{ color: '#1890ff', textDecoration: 'none' }}
