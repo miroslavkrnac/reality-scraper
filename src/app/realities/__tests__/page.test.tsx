@@ -32,6 +32,8 @@ vi.mock('@/hooks/useRealities', () => ({
 vi.mock('@/utils/reality.utils', () => ({
 	deleteReality: vi.fn().mockResolvedValue(true),
 	toggleLike: mockToggleLike,
+	calculatePricePerM2: vi.fn().mockReturnValue(50000),
+	formatPricePerM2: vi.fn().mockReturnValue('50,000 Kč/m²'),
 }));
 
 // @NOTE: Mock Ant Design App component

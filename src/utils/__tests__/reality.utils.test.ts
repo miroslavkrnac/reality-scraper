@@ -1,6 +1,14 @@
 import type { Reality } from '@/types/reality.types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { deleteReality, fetchRealities, getRealities } from '../reality.utils';
+import {
+	calculatePricePerM2,
+	deleteReality,
+	extractPriceNumber,
+	extractSquareMeters,
+	fetchRealities,
+	formatPricePerM2,
+	getRealities,
+} from '../reality.utils';
 
 // @NOTE: Mock Prisma client
 vi.mock('@/lib/db', () => {
@@ -181,6 +189,114 @@ describe('reality.utils', () => {
 			const result = await deleteReality(1);
 
 			expect(result).toBe(false);
+		});
+	});
+});
+
+describe('Price per m² utilities', () => {
+	describe('extractSquareMeters', () => {
+		it('should extract square meters from title with m²', () => {
+			const title = 'Prodej bytu 3+kk 66 m²';
+			const result = extractSquareMeters(title);
+			expect(result).toBe(66);
+		});
+
+		it('should extract square meters from title with m2', () => {
+			const title = 'Prodej stavebního pozemku 1197 m2';
+			const result = extractSquareMeters(title);
+			expect(result).toBe(1197);
+		});
+
+		it('should extract square meters with spaces in number', () => {
+			const title = 'Prodej bytu 1 234 m²';
+			const result = extractSquareMeters(title);
+			expect(result).toBe(1234);
+		});
+
+		it('should return null when no square meters found', () => {
+			const title = 'Prodej bytu bez m² informace';
+			const result = extractSquareMeters(title);
+			expect(result).toBeNull();
+		});
+	});
+
+	describe('extractPriceNumber', () => {
+		it('should extract price from Kč format', () => {
+			const price = '7 700 000 Kč';
+			const result = extractPriceNumber(price);
+			expect(result).toBe(7700000);
+		});
+
+		it('should extract price from CZK format', () => {
+			const price = '4 355 000 CZK';
+			const result = extractPriceNumber(price);
+			expect(result).toBe(4355000);
+		});
+
+		it('should extract price with additional info', () => {
+			const price = '4 355 000 Kč (3 638 Kč/m²)';
+			const result = extractPriceNumber(price);
+			expect(result).toBe(4355000);
+		});
+
+		it('should return null when no price found', () => {
+			const price = 'Cena dohodou';
+			const result = extractPriceNumber(price);
+			expect(result).toBeNull();
+		});
+	});
+
+	describe('calculatePricePerM2', () => {
+		it('should calculate price per m² correctly', () => {
+			const price = '7 700 000 Kč';
+			const title = 'Prodej bytu 3+kk 66 m²';
+			const result = calculatePricePerM2(price, title);
+			expect(result).toBe(116667); // 7700000 / 66 = 116666.67... rounded to 116667
+		});
+
+		it('should calculate price per m² for land', () => {
+			const price = '4 355 000 Kč (3 638 Kč/m²)';
+			const title = 'Prodej stavebního pozemku 1197 m²';
+			const result = calculatePricePerM2(price, title);
+			expect(result).toBe(3638); // 4355000 / 1197 = 3638.26... rounded to 3638
+		});
+
+		it('should return null when price cannot be extracted', () => {
+			const price = 'Cena dohodou';
+			const title = 'Prodej bytu 66 m²';
+			const result = calculatePricePerM2(price, title);
+			expect(result).toBeNull();
+		});
+
+		it('should return null when square meters cannot be extracted', () => {
+			const price = '7 700 000 Kč';
+			const title = 'Prodej bytu bez m²';
+			const result = calculatePricePerM2(price, title);
+			expect(result).toBeNull();
+		});
+
+		it('should return null when square meters is zero', () => {
+			const price = '7 700 000 Kč';
+			const title = 'Prodej bytu 0 m²';
+			const result = calculatePricePerM2(price, title);
+			expect(result).toBeNull();
+		});
+	});
+
+	describe('formatPricePerM2', () => {
+		it('should format price per m² with thousands separators', () => {
+			const result = formatPricePerM2(116667);
+			expect(result).toBe('116,667 Kč/m²');
+		});
+
+		it('should format small numbers correctly', () => {
+			const result = formatPricePerM2(3638);
+			expect(result).toBe('3,638 Kč/m²');
+		});
+
+		it('should return N/A for null input', () => {
+			const result = formatPricePerM2(null);
+			expect(result).toBe('N/A');
 		});
 	});
 });

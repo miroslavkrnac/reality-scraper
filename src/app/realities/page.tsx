@@ -2,7 +2,7 @@
 
 import { useRealities } from '@/hooks/useRealities';
 import type { Reality, RealityType } from '@/types/reality.types';
-import { deleteReality, toggleLike } from '@/utils/reality.utils';
+import { calculatePricePerM2, deleteReality, formatPricePerM2, toggleLike } from '@/utils/reality.utils';
 import { DeleteOutlined, EyeOutlined, FilterOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Input, Modal, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -182,6 +182,20 @@ const RealitiesPage = () => {
 			dataIndex: 'price',
 			key: 'price',
 			sorter: (a, b) => a.price.localeCompare(b.price),
+		},
+		{
+			title: 'Price per m²',
+			key: 'pricePerM2',
+			width: 140,
+			render: (_, record) => {
+				const pricePerM2 = calculatePricePerM2(record.price, record.title);
+				return formatPricePerM2(pricePerM2);
+			},
+			sorter: (a, b) => {
+				const pricePerM2A = calculatePricePerM2(a.price, a.title) || 0;
+				const pricePerM2B = calculatePricePerM2(b.price, b.title) || 0;
+				return pricePerM2A - pricePerM2B;
+			},
 		},
 		{
 			title: 'Type',
@@ -412,6 +426,29 @@ const RealitiesPage = () => {
 												style={{ textAlign: 'right', color: '#52c41a', fontSize: '16px' }}
 											>
 												{selectedReality.price}
+											</Text>
+										</div>
+
+										<div
+											style={{
+												display: 'flex',
+												justifyContent: 'space-between',
+												alignItems: 'center',
+												padding: '12px',
+												backgroundColor: '#f8f9fa',
+												borderRadius: '8px',
+											}}
+										>
+											<Text strong style={{ color: '#666' }}>
+												Price per m²:
+											</Text>
+											<Text
+												strong
+												style={{ textAlign: 'right', color: '#1890ff', fontSize: '16px' }}
+											>
+												{formatPricePerM2(
+													calculatePricePerM2(selectedReality.price, selectedReality.title),
+												)}
 											</Text>
 										</div>
 
